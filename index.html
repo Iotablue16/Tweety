@@ -173,7 +173,7 @@ select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--
 <script>
 /* ---------- Outils ---------- */
 const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const esc=s=>String(s==null?'':s).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
 const rand=n=>Math.floor(Math.random()*n),pick=a=>a[rand(a.length)],clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const later=(ms,fn)=>setTimeout(fn,ms);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -317,7 +317,7 @@ async function fill(force){
   if(Date.now()<coolUntil||Date.now()-lastFill<20000)return;
   filling=true;lastFill=Date.now();
   const now=new Date().toLocaleString('fr-FR',{weekday:'long',hour:'2-digit',minute:'2-digit'});
-  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\nMoment: ${now}.\n${repCtx()}\n\nFil récent (identifiant entre crochets):\n${feedCtx()||'(vide)'}\n\nGénère l’activité du réseau, avec un ${STYLE}\n- "posts": 4 nouvelles publications courtes (max 220 caractères) de personnages différents. Elles peuvent parler de leur vie, de l’actualité du réseau, de publications du fil, ou de l’utilisateur selon sa réputation (mal vu: on le critique ou on s’en moque; apprécié: on le salue).\n- "comments": 5 commentaires courts sur des publications du fil (champ "post" = identifiant exact entre crochets), de personnages différents. Ils peuvent se répondre entre eux ou répondre à l’utilisateur.\nRéponds uniquement par un JSON: {"posts":[{"who":"id","text":"..."}],"comments":[{"post":"id","who":"id","text":"..."}]}`,true);
+  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\nMoment: ${now}.\n${repCtx()}\n\nFil récent (identifiant entre crochets):\n${feedCtx()||(vide)}\n\nGénère l’activité du réseau, avec un ${STYLE}\n- "posts": 4 nouvelles publications courtes (max 220 caractères) de personnages différents. Elles peuvent parler de leur vie, de l’actualité du réseau, de publications du fil, ou de l’utilisateur selon sa réputation (mal vu: on le critique ou on s’en moque; apprécié: on le salue).\n- "comments": 5 commentaires courts sur des publications du fil (champ "post" = identifiant exact entre crochets), de personnages différents. Ils peuvent se répondre entre eux ou répondre à l’utilisateur.\nRéponds uniquement par un JSON: {"posts":[{"who":"id","text":"..."}],"comments":[{"post":"id","who":"id","text":"..."}]}`,true);
   filling=false;
   if(r&&typeof r==='object'){
     (r.posts||[]).forEach(x=>{if(x&&byId(x.who)&&x.text)Q.posts.push({who:x.who,text:String(x.text).slice(0,260)})});
@@ -329,7 +329,7 @@ async function fill(force){
 function insertPost(p){
   if(view!=='F')return;const f=$('#feed'),em=f.querySelector('.empty');if(em)em.remove();
   const before=document.documentElement.scrollHeight;
-  f.insertAdjacentHTML('afterbegin',postHTML(p,'new'));
+  f.insertAdjacentHTML('afterend',postHTML(p,'new'));
   if(scrollY>160)scrollBy(0,document.documentElement.scrollHeight-before);
 }
 function addPost(who,text){
@@ -374,7 +374,7 @@ function bumpLikes(p,total){const n=3+rand(3);for(let i=1;i<=n;i++)later(i*(1500
 async function reactUser(kind,text,p){
   const thread=p.cm.slice(-6).map(k=>nameOf(k.who)+': '+k.text).join('\n');
   const what=kind==='post'?`L’utilisateur vient de publier: "${text}"`:`Sous la publication de ${p.who==='me'?'l’utilisateur':nameOf(p.who)} ("${p.text.slice(0,140)}"), l’utilisateur vient de commenter: "${text}"`;
-  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\n${repCtx()}\n\n${what}\nCommentaires déjà présents:\n${thread||'(aucun)'}\n\nFais réagir le réseau avec un ${STYLE}\n1) "tone": entier de -2 à 2 pour ce que dit l’utilisateur (-2 insultant, haineux ou très méchant; -1 désagréable, arrogant, méprisant; 0 banal ou neutre; 1 sympa, positif; 2 très gentil, généreux, inspirant). "reason": 3 à 6 mots expliquant le ton.\n2) "comments": 3 à 5 commentaires courts de personnages différents sur la publication ${kind==='post'?'':'(réponses au commentaire ou à ce qui se dit)'}. Si tone<0: ils se plaignent, critiquent ou se moquent selon leur personnalité. Si tone>0: ils félicitent, soutiennent, remercient. Si tone=0: réactions variées.\n3) "posts": ${kind==='post'?'1 à 3':'0 à 1'} publications personnelles de personnages qui parlent de ce que l’utilisateur vient de dire (se plaindre sur leur propre compte si tone<0, le saluer si tone>0, vide si tone=0), pouvant citer @${S.me.handle}.\nRéponds uniquement par un JSON: {"tone":0,"reason":"...","comments":[{"who":"id","text":"..."}],"posts":[{"who":"id","text":"..."}]}`);
+  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\n${repCtx()}\n\n${what}\nCommentaires déjà présents:\n${thread||(aucun)}\n\nFais réagir le réseau avec un ${STYLE}\n1) "tone": entier de -2 à 2 pour ce que dit l’utilisateur (-2 insultant, haineux ou très méchant; -1 désagréable, arrogant, méprisant; 0 banal ou neutre; 1 sympa, positif; 2 très gentil, généreux, inspirant). "reason": 3 à 6 mots expliquant le ton.\n2) "comments": 3 à 5 commentaires courts de personnages différents sur la publication ${kind==='post'?'':'(réponses au commentaire ou à ce qui se dit)'}. Si tone<0: ils se plaignent, critiquent ou se moquent selon leur personnalité. Si tone>0: ils félicitent, soutiennent, remercient. Si tone=0: réactions variées.\n3) "posts": ${kind==='post'?'1 à 3':'0 à 1'} publications personnelles de personnages qui parlent de ce que l’utilisateur vient de dire (se plaindre sur leur propre compte si tone<0, le saluer si tone>0, vide si tone=0), pouvant citer @${S.me.handle}.\nRéponds uniquement par un JSON: {"tone":0,"reason":"...","comments":[{"who":"id","text":"..."}],"posts":[{"who":"id","text":"..."}]}`);
   if(!r||typeof r!=='object')return;
   const tone=clamp(Math.round(+r.tone||0),-2,2);
   if(kind==='post')p.tone=tone;
