@@ -1,353 +1,1313 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Status IA</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1d9bf0">
-<style>
-:root{color-scheme:dark;--bg:#000;--card:#000;--ink:#e7e9ea;--mute:#71767b;--line:#2f3336;--acc:#1d9bf0;--acc-ink:#fff;--me:#1d9bf0;--bub:#16181c;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media not all{:root{--bg:#12151a;--card:#1b1f26;--ink:#eceff3;--mute:#8b94a3;--line:#2a303a;--acc:#35c9b0;--acc-ink:#07211c;--me:#1f8f7d;--bub:#272d37}}
-:root[data-theme="dark"]{--bg:#12151a;--card:#1b1f26;--ink:#eceff3;--mute:#8b94a3;--line:#2a303a;--acc:#35c9b0;--acc-ink:#07211c;--me:#1f8f7d;--bub:#272d37}
-*{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.app{max-width:640px;margin:0 auto;min-height:100vh;padding-bottom:64px;background:var(--card);border-inline:1px solid var(--line)}
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
-h1{margin:0;padding:14px 16px 6px;font-size:1.5rem;font-weight:800;letter-spacing:-.02em}
-nav{display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(640px,100%);background:#000;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:6}
-nav button{flex:1;padding:12px;border:0;background:none;color:var(--mute);font:600 1rem inherit;font-family:inherit;border-bottom:3px solid transparent;cursor:pointer}
-nav button[aria-selected=true]{color:var(--ink);border-color:var(--acc)}
-button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:1.35rem}
-.av.s{width:36px;height:36px;font-size:1.1rem}
-.composer{display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
-select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit}
-textarea,input[type=text],input[type=password]{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit;resize:none}
-.btn{border:0;background:var(--acc);color:var(--acc-ink);font:600 .95rem inherit;font-family:inherit;padding:9px 16px;border-radius:999px;cursor:pointer}
-.btn:disabled{opacity:.5;cursor:default}
-.btn.ghost{background:none;color:var(--mute);border:1px solid var(--line)}
-.row{display:flex;gap:10px;align-items:center}
-.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;color:var(--mute);font-size:.9rem}
-.post{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
-.post .body{flex:1;min-width:0}
-.who{font-weight:800}.hd{color:var(--mute);font-size:.9rem}
-.txt{white-space:pre-wrap;overflow-wrap:anywhere;margin:2px 0 8px}
-.acts{display:flex;justify-content:space-between;max-width:420px;color:var(--mute);font-size:.92rem}
-.acts button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:4px 0}
-.acts button.on{color:#e0245e}
-.cm{margin-top:10px;padding-left:12px;border-left:2px solid var(--line)}
-.cm .c{display:flex;gap:8px;margin:8px 0}
-.cm .c b{font-weight:800}
-.empty{padding:40px 24px;text-align:center;color:var(--mute)}
-.strip{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;border-bottom:1px solid var(--line)}
-.strip button{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;color:var(--mute);font:.8rem inherit;font-family:inherit;padding:6px 8px;border-radius:12px;cursor:pointer}
-.strip button[aria-selected=true]{background:var(--bg);color:var(--ink)}
-.chat{display:flex;flex-direction:column;height:calc(100vh - 340px);min-height:360px}
-.msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
-.m{max-width:80%;padding:9px 13px;border-radius:18px;background:var(--bub);white-space:pre-wrap;overflow-wrap:anywhere}
-.m.me{align-self:flex-end;background:var(--me);color:var(--acc-ink);border-bottom-right-radius:6px}
-.m.ai{border-bottom-left-radius:6px}
-.send{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 16px;border-radius:12px;max-width:90%;z-index:9}
-.acts svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
-.acts button.on svg{fill:currentColor}.acts button.on{color:#f91880}.acts button.rt{color:#00ba7c}.acts span{display:inline-block}
-.vb{width:16px;height:16px;vertical-align:-3px;margin-left:2px}
-.av{overflow:hidden}.av img{width:100%;height:100%;object-fit:cover;display:block}
-.prof{padding:16px}.prof h2{font-size:1.1rem;margin:22px 0 8px}
-.fld{display:flex;flex-direction:column;gap:4px;font-size:.88rem;color:var(--mute);margin:8px 0;flex:1;min-width:140px}
-.fld input[type=color]{width:100%;height:40px;padding:2px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
-.chead{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line)}
-.mine{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.mine>div:nth-child(2){flex:1;min-width:120px}
-[hidden]{display:none!important}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Status IA</title>
+  <style>
+    :root{
+      color-scheme: dark;
+      --bg:#0d1117;
+      --card:#111827;
+      --ink:#f3f4f6;
+      --mute:#9ca3af;
+      --line:#2a3446;
+      --acc:#1d9bf0;
+      --acc-ink:#fff;
+      --me:#1d9bf0;
+      --bub:#1c2330;
+      --soft:#f3f4f6;
+      --danger:#ff5d7a;
+      --success:#1ec88a;
+      --shadow:rgba(0,0,0,.28);
+      box-sizing:border-box;
+      padding-top:env(safe-area-inset-top,0px);
+      padding-bottom:env(safe-area-inset-bottom,0px);
+    }
+
+    :root[data-theme="blue"] {
+      --bg:#edf6ff;
+      --card:#ffffff;
+      --ink:#122133;
+      --mute:#5e7086;
+      --line:#dfeaf9;
+      --acc:#1c7ef2;
+      --acc-ink:#ffffff;
+      --me:#1c7ef2;
+      --bub:#eef5ff;
+      --soft:#f7fbff;
+    }
+
+    :root[data-theme="black"] {
+      --bg:#000000;
+      --card:#0d1117;
+      --ink:#f3f4f6;
+      --mute:#9aa3af;
+      --line:#2b2f36;
+      --acc:#1d9bf0;
+      --acc-ink:#ffffff;
+      --me:#1d9bf0;
+      --bub:#171b22;
+      --soft:#0f1726;
+    }
+
+    :root[data-theme="pink"] {
+      --bg:#fff1f7;
+      --card:#ffffff;
+      --ink:#2a1320;
+      --mute:#7c5e6a;
+      --line:#f3d8e4;
+      --acc:#e84d96;
+      --acc-ink:#fff;
+      --me:#e84d96;
+      --bub:#fff0f6;
+      --soft:#fff7fb;
+    }
+
+    :root[data-theme="white"] {
+      --bg:#ffffff;
+      --card:#ffffff;
+      --ink:#111827;
+      --mute:#6b7280;
+      --line:#e5e7eb;
+      --acc:#333333;
+      --acc-ink:#ffffff;
+      --me:#333333;
+      --bub:#f3f4f6;
+      --soft:#f9fafb;
+    }
+
+    :root[data-theme="yellow"] {
+      --bg:#fff9de;
+      --card:#fffdf7;
+      --ink:#2c2410;
+      --mute:#7d6d3a;
+      --line:#efe2a8;
+      --acc:#d9a300;
+      --acc-ink:#1e1803;
+      --me:#d9a300;
+      --bub:#fff4c9;
+      --soft:#fffdf4;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-padding-top:env(safe-area-inset-top,0px)}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      transition:.2s ease;
+    }
+    .app{
+      max-width:640px;
+      margin:0 auto;
+      min-height:100vh;
+      background:var(--card);
+      border-inline:1px solid var(--line);
+      position:relative;
+    }
+    header{
+      position:sticky;
+      top:0;
+      z-index:25;
+      background:color-mix(in srgb, var(--card) 92%, transparent);
+      backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    h1{margin:0;padding:14px 16px 6px;font-size:1.45rem;font-weight:800;letter-spacing:-.02em}
+    nav{
+      display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+      width:min(640px,100%);background:var(--card);border-top:1px solid var(--line);
+      padding-bottom:env(safe-area-inset-bottom,0px);z-index:30;
+    }
+    nav button{
+      flex:1;padding:12px;border:0;background:none;color:var(--mute);
+      font:600 1rem inherit;font-family:inherit;border-bottom:3px solid transparent;cursor:pointer;
+    }
+    nav button[aria-selected=true]{color:var(--ink);border-color:var(--acc)}
+    button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+    .av{
+      flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
+      font-size:1.3rem;background:linear-gradient(135deg,#dbeafe,#f5d0fe);overflow:hidden;border:1px solid rgba(255,255,255,.18);
+      box-shadow:0 4px 10px rgba(0,0,0,.18);
+    }
+    .av.s{width:34px;height:34px;font-size:1rem}
+    .av img{width:100%;height:100%;object-fit:cover;display:block}
+    .composer{display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
+    select, textarea, input[type=text], input[type=password], input[type=color]{
+      width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit;resize:none;
+    }
+    .btn{
+      border:0;background:var(--acc);color:var(--acc-ink);font:600 .95rem inherit;font-family:inherit;
+      padding:9px 16px;border-radius:999px;cursor:pointer;transition:.15s ease;
+    }
+    .btn:hover{filter:brightness(1.05)}
+    .btn:disabled{opacity:.5;cursor:default}
+    .btn.ghost{
+      background:transparent;color:var(--ink);border:1px solid var(--line);
+    }
+    .row{display:flex;gap:10px;align-items:center}
+    .bar{
+      display:flex;justify-content:space-between;align-items:center;padding:10px 16px;color:var(--mute);font-size:.9rem;
+      background:var(--soft);border-bottom:1px solid var(--line);
+    }
+    .post{
+      display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);
+      cursor:pointer;
+    }
+    .post:hover{background:color-mix(in srgb, var(--soft) 75%, transparent)}
+    .post .body{flex:1;min-width:0}
+    .who{font-weight:800;display:inline-block}.hd{color:var(--mute);font-size:.9rem}
+    .txt{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0 10px;font-size:1rem}
+    .acts{display:flex;justify-content:space-between;max-width:420px;color:var(--mute);font-size:.92rem;align-items:center}
+    .acts button{
+      border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:6px
+    }
+    .acts button.on{color:#f91880}
+    .acts button.rt{color:#00ba7c}
+    .acts svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px}
+    .acts button.on svg{fill:currentColor}
+    .cm{margin-top:10px;padding-left:12px;border-left:2px solid var(--line)}
+    .cm .c{display:flex;gap:8px;margin:8px 0;align-items:flex-start}
+    .cm .c b{font-weight:800}
+    .empty{padding:40px 24px;text-align:center;color:var(--mute)}
+    .strip{
+      display:flex;gap:6px;overflow-x:auto;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--soft);
+    }
+    .strip button{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;color:var(--mute);font:.8rem inherit;font-family:inherit;padding:6px 8px;border-radius:12px;cursor:pointer}
+    .strip button[aria-selected=true]{background:var(--bg);color:var(--ink)}
+    .chat{display:flex;flex-direction:column;height:calc(100vh - 330px);min-height:360px}
+    .msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;background:var(--card)}
+    .m{max-width:80%;padding:9px 13px;border-radius:18px;background:var(--bub);white-space:pre-wrap;overflow-wrap:anywhere}
+    .m.me{align-self:flex-end;background:var(--me);color:var(--acc-ink);border-bottom-right-radius:6px}
+    .m.ai{border-bottom-left-radius:6px}
+    .send{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:var(--soft)}
+    .toast{
+      position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+      background:var(--ink);color:var(--card);padding:10px 16px;border-radius:12px;max-width:90%;z-index:999;
+      box-shadow:0 12px 28px var(--shadow);
+    }
+    .vb{width:16px;height:16px;vertical-align:-3px;margin-left:2px}
+    .prof{padding:16px}
+    .banner{
+      height:150px;
+      margin:-16px -16px 14px;
+      border-radius:0 0 18px 18px;
+      background:linear-gradient(135deg,#dfeaf9,#f5d0fe) center/cover no-repeat;
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .banner::after{
+      content:"";
+      position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,.2), rgba(0,0,0,0));
+    }
+    .prof h2{font-size:1.1rem;margin:20px 0 8px}
+    .fld{
+      display:flex;flex-direction:column;gap:4px;font-size:.88rem;color:var(--mute);margin:8px 0;flex:1;min-width:140px
+    }
+    .fld input[type=color]{height:42px;padding:4px;border-radius:10px}
+    .mine{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+    .mine>div:nth-child(2){flex:1;min-width:120px}
+    [hidden]{display:none!important}
+    @media (max-width: 440px){
+      .composer{padding:12px 12px}
+      .post{padding:12px}
+      .prof{padding:12px}
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-<header>
-  <h1>Status IA</h1>
-  <nav role="tablist"><button role="tab" id="tF" aria-selected="true">Accueil</button><button role="tab" id="tM" aria-selected="false">Messages</button><button role="tab" id="tP" aria-selected="false">Profil</button></nav>
-</header>
+  <div class="app">
+    <header>
+      <h1>Status IA</h1>
+      <nav role="tablist">
+        <button role="tab" id="tF" aria-selected="true">Accueil</button>
+        <button role="tab" id="tM" aria-selected="false">Messages</button>
+        <button role="tab" id="tP" aria-selected="false">Profil</button>
+      </nav>
+    </header>
 
-<section id="vF">
-  <div class="composer">
-    <div id="meAv"></div>
-    <div style="flex:1">
-      <textarea id="pt" rows="2" placeholder="Quoi de neuf ?" aria-label="Nouvelle publication"></textarea>
-      <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn" id="pb">Publier</button></div>
-    </div>
+    <section id="vF">
+      <div class="composer">
+        <div id="meAv"></div>
+        <div style="flex:1">
+          <textarea id="pt" rows="2" placeholder="Quoi de neuf ?" aria-label="Nouvelle publication"></textarea>
+          <div class="row" style="justify-content:flex-end;margin-top:8px">
+            <button class="btn" id="pb" type="button">Publier</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bar">
+        <span id="fs">Les personnages réagissent à tes publications.</span>
+        <button class="btn ghost" id="rf" type="button">Nouvelles publications</button>
+      </div>
+
+      <div id="feed"></div>
+    </section>
+
+    <section id="vP" hidden>
+      <div class="prof">
+        <div id="banner" class="banner"></div>
+
+        <div class="row" style="gap:14px;align-items:center">
+          <div id="pAv"></div>
+          <div>
+            <div class="who" id="pName"></div>
+            <div class="hd" id="pStat"></div>
+          </div>
+        </div>
+
+        <button class="btn ghost" id="editProfile" type="button">Modifier</button>
+
+        <div id="profileEdit" hidden>
+          <h2>Mon profil</h2>
+          <label class="fld">Nom<input type="text" id="fName" maxlength="30"></label>
+          <label class="fld">Identifiant<input type="text" id="fHandle" maxlength="20"></label>
+          <label class="fld">Bio<input type="text" id="fBio" maxlength="120"></label>
+          <label class="fld">Mes abonnés<input type="text" inputmode="numeric" id="fFol"></label>
+
+          <label class="fld">Fournisseur d’IA
+            <select id="fProv">
+              <option value="gemini">Google Gemini (gratuit)</option>
+              <option value="anthropic">Anthropic Claude (payant)</option>
+            </select>
+          </label>
+
+          <label class="fld">Clé API (stockée uniquement dans ce navigateur)
+            <input type="password" id="fKey" autocomplete="off">
+          </label>
+
+          <label class="fld">Modèle
+            <input type="text" id="fModel" autocomplete="off">
+          </label>
+
+          <div class="hd" id="fHelp" style="margin:8px 0"></div>
+
+          <div class="row" style="flex-wrap:wrap">
+            <label class="fld">Photo de profil<input type="file" accept="image/*" id="fPhoto"></label>
+            <label class="fld">Couleur de l’avatar<input type="color" id="fColor"></label>
+            <label class="fld">Couleur de l’application<input type="color" id="fAcc"></label>
+          </div>
+
+          <div class="row" style="flex-wrap:wrap;gap:8px">
+            <button class="btn ghost" id="fNoPhoto" type="button">Retirer la photo</button>
+            <button class="btn ghost" id="fNoBanner" type="button">Retirer la bannière</button>
+          </div>
+
+          <label class="fld">Bannière du profil<input type="file" accept="image/*" id="fBanner"></label>
+
+          <label class="fld">Thème de l’application
+            <select id="fTheme">
+              <option value="blue">Bleu</option>
+              <option value="black">Noir</option>
+              <option value="pink">Rose</option>
+              <option value="white">Blanc</option>
+              <option value="yellow">Jaune</option>
+            </select>
+          </label>
+
+          <button class="btn" id="saveProfile" type="button">Terminer</button>
+
+          <h2>Créer un personnage</h2>
+          <label class="fld">Nom<input type="text" id="cName" maxlength="30"></label>
+          <label class="fld">Identifiant<input type="text" id="cHandle" maxlength="20"></label>
+          <label class="fld">Personnalité<textarea id="cBio" rows="3" maxlength="300"></textarea></label>
+          <div class="row" style="flex-wrap:wrap">
+            <label class="fld">Emoji<input type="text" id="cEmoji" maxlength="4" placeholder="🦊"></label>
+            <label class="fld">Abonnés<input type="text" inputmode="numeric" id="cFol" placeholder="1000"></label>
+            <label class="fld">Couleur<input type="color" id="cColor" value="#f3dff0"></label>
+          </div>
+          <label class="fld">Photo<input type="file" accept="image/*" id="cPhoto"></label>
+          <button class="btn" id="cMake" type="button">Créer le personnage</button>
+
+          <h2>Photos des personnages</h2>
+          <div class="hd">Remplace l’avatar illustré par une vraie photo de ton choix.</div>
+          <div id="allChars"></div>
+          <input type="file" accept="image/*" id="ph" hidden>
+
+          <h2>Mes personnages</h2>
+          <div id="myChars"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="vM" hidden>
+      <div class="strip" id="strip" role="tablist"></div>
+      <div class="bar">
+        <span>Messages illimités · tout l’historique est conservé</span>
+        <button class="btn ghost" id="cl" type="button">Effacer</button>
+      </div>
+      <div class="chat">
+        <div class="chead" id="chead" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)"></div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="send">
+          <textarea id="mi" rows="1" placeholder="Écrire un message" aria-label="Message"></textarea>
+          <button class="btn" id="mb" type="button">Envoyer</button>
+        </div>
+      </div>
+    </section>
   </div>
-  <div class="bar"><span id="fs">Les personnages réagissent à tes publications.</span><button class="btn ghost" id="rf">Nouvelles publications</button></div>
-  <div id="feed"></div>
-</section>
 
-<section id="vP" hidden>
-<div class="prof">
-  <div class="row" style="gap:14px"><div id="pAv"></div><div><div class="who" id="pName"></div><div class="hd" id="pStat"></div></div></div>
-  <h2>Mon profil</h2>
-  <label class="fld">Nom<input type="text" id="fName" maxlength="30"></label>
-  <label class="fld">Identifiant<input type="text" id="fHandle" maxlength="20"></label>
-  <label class="fld">Bio<input type="text" id="fBio" maxlength="120"></label>
-  <label class="fld">Mes abonnés<input type="text" inputmode="numeric" id="fFol"></label>
-  <label class="fld">Fournisseur d’IA<select id="fProv"><option value="gemini">Google Gemini (gratuit)</option><option value="anthropic">Anthropic Claude (payant)</option></select></label>
-  <label class="fld">Clé API (stockée uniquement dans ce navigateur)<input type="password" id="fKey" autocomplete="off"></label>
-  <label class="fld">Modèle<input type="text" id="fModel" autocomplete="off"></label>
-  <div class="hd" id="fHelp"></div>
-  <div class="row" style="flex-wrap:wrap">
-    <label class="fld">Photo de profil<input type="file" accept="image/*" id="fPhoto"></label>
-    <label class="fld">Couleur de l’avatar<input type="color" id="fColor"></label>
-    <label class="fld">Couleur de l’application<input type="color" id="fAcc"></label>
-  </div>
-  <button class="btn ghost" id="fNoPhoto">Retirer la photo</button>
-  <h2>Créer un personnage</h2>
-  <label class="fld">Nom<input type="text" id="cName" maxlength="30"></label>
-  <label class="fld">Identifiant<input type="text" id="cHandle" maxlength="20"></label>
-  <label class="fld">Personnalité (comment il parle, ce qu’il aime)<textarea id="cBio" rows="3" maxlength="300"></textarea></label>
-  <div class="row" style="flex-wrap:wrap">
-    <label class="fld">Emoji<input type="text" id="cEmoji" maxlength="4" placeholder="🦊"></label>
-    <label class="fld">Abonnés<input type="text" inputmode="numeric" id="cFol" placeholder="1000"></label>
-    <label class="fld">Couleur<input type="color" id="cColor" value="#f3dff0"></label>
-  </div>
-  <label class="fld">Photo<input type="file" accept="image/*" id="cPhoto"></label>
-  <button class="btn" id="cMake">Créer le personnage</button>
-  <h2>Photos des personnages</h2><div class="hd">Remplace l’avatar illustré par une vraie photo de ton choix.</div><div id="allChars"></div><input type="file" accept="image/*" id="ph" hidden>
-  <h2>Mes personnages</h2><div id="myChars"></div>
-</div>
-</section>
+  <div class="toast" id="toast" hidden></div>
 
-<section id="vM" hidden>
-  <div class="strip" id="strip" role="tablist"></div>
-  <div class="bar"><span>Messages illimités · tout l’historique est conservé</span><button class="btn ghost" id="cl">Effacer</button></div>
-  <div class="chat"><div class="chead" id="chead"></div><div class="msgs" id="msgs" aria-live="polite"></div>
-    <div class="send"><textarea id="mi" rows="1" placeholder="Écrire un message" aria-label="Message"></textarea><button class="btn" id="mb">Envoyer</button></div>
-  </div>
-</section>
-</div>
-<div class="toast" id="toast" hidden></div>
+  <script>
+    const CH = [
+      { id: "lea", n: "Léa Marchand", h: "@lea_voyage", e: "✈️", c: "#bfe3f2", b: "globe-trotteuse enthousiaste, adore les anecdotes de voyage", f: 48200, p: "" },
+      { id: "max", n: "Maxime", h: "@max_gamer", e: "🎮", c: "#d8c8f3", b: "gamer sarcastique mais attachant, parle jeux vidéo", f: 12900, p: "" },
+      { id: "ami", n: "Amina", h: "@amina_cuisine", e: "🍲", c: "#f8d9b6", b: "cheffe chaleureuse, partage recettes et astuces", f: 91500, p: "" },
+      { id: "hen", n: "Pr Henri", h: "@henri_savoir", e: "📚", c: "#d6e3c3", b: "érudit pince-sans-rire, adore les faits surprenants", f: 7300, p: "" },
+      { id: "jad", n: "Jade", h: "@jade_fit", e: "💪", c: "#f6c6cf", b: "coach sportive ultra motivante", f: 63400, p: "" },
+      { id: "theo", n: "Théo", h: "@theo_techno", e: "💻", c: "#c3d7f6", b: "développeur geek, blagues de code et gadgets", f: 21800, p: "" },
+      { id: "nou", n: "Nour", h: "@nour_art", e: "🎨", c: "#f3dff0", b: "artiste rêveuse, poétique et curieuse", f: 5600, p: "" },
+      { id: "gus", n: "Gus", h: "@gus_foot", e: "⚽", c: "#cfe9d4", b: "supporter de foot de mauvaise foi, drôle", f: 34100, p: "" }
+    ];
 
-<script>
-const CH=[
-{id:'lea',n:'Léa Marchand',h:'@lea_voyage',e:'✈️',c:'#bfe3f2',b:'globe-trotteuse enthousiaste, adore les anecdotes de voyage'},
-{id:'max',n:'Maxime',h:'@max_gamer',e:'🎮',c:'#d8c8f3',b:'gamer sarcastique mais attachant, parle jeux vidéo'},
-{id:'ami',n:'Amina',h:'@amina_cuisine',e:'🍲',c:'#f8d9b6',b:'cheffe chaleureuse, partage recettes et astuces'},
-{id:'hen',n:'Pr Henri',h:'@henri_savoir',e:'📚',c:'#d6e3c3',b:'érudit pince-sans-rire, adore les faits surprenants'},
-{id:'jad',n:'Jade',h:'@jade_fit',e:'💪',c:'#f6c6cf',b:'coach sportive ultra motivante'},
-{id:'theo',n:'Théo',h:'@theo_techno',e:'💻',c:'#c3d7f6',b:'développeur geek, blagues de code et gadgets'},
-{id:'nou',n:'Nour',h:'@nour_art',e:'🎨',c:'#f3dff0',b:'artiste rêveuse, poétique et curieuse'},
-{id:'gus',n:'Gus',h:'@gus_foot',e:'⚽',c:'#cfe9d4',b:'supporter de foot de mauvaise foi, drôle'}];
-const FOL={lea:48200,max:12900,ami:91500,hen:7300,jad:63400,theo:21800,nou:5600,gus:34100};CH.forEach(c=>c.f=FOL[c.id]);
-const NEW={lea:{n:'Léa | en transit',h:'@transit_lea',s:'travel',b:'backpackeuse de 27 ans, toujours dans un aéroport ou un train, adore les bons plans, râle sur les retards'},max:{n:'Maxime',h:'@M4xLag',s:'game',b:'gamer de 24 ans sarcastique, accuse le lag pour tout, parle de jeux vidéo, répond court avec ironie'},ami:{n:'Amina 🍋 cuisine',h:'@marmite_amina',s:'cook',b:'cuisine maison, partage recettes simples et astuces anti-gaspi, chaleureuse'},hen:{n:'Henri Lefèvre',h:'@bibliophage_',s:'books',v:1,b:'prof d’histoire retraité, érudit pince-sans-rire, sort des faits surprenants, corrige les erreurs avec ironie'},jad:{n:'Jade Coach',h:'@jade_sweat',s:'fit',v:1,b:'coach sportive très motivante, parle de séances et de nutrition simple'},theo:{n:'Théo',h:'@theo_404',s:'code',b:'développeur backend de 29 ans, blagues de code, galères de prod, trop de café'},nou:{n:'nour',h:'@nour_encre',s:'art',b:'illustratrice rêveuse qui écrit en minuscules, poétique, parle de dessin et de lumière'},gus:{n:'Gus',h:'@arbitre_vendu',s:'foot',b:'supporter de foot de mauvaise foi, tout est la faute de l’arbitre, drôle et excessif'}};
-CH.forEach(c=>Object.assign(c,NEW[c.id]));
-const $=s=>document.querySelector(s), all=()=>CH.concat(S.chars||[]), byId=id=>all().find(c=>c.id===id);
-const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-let S={posts:[],dms:{}}, cur='lea', busy=false, openC={};
-try{const r=localStorage.getItem('statusia');if(r)S=JSON.parse(r)}catch(e){}
-S.me=Object.assign({name:'Toi',handle:'moi',bio:'',photo:'',color:'#bfc7d1',accent:'#0a8f7a',followers:120},S.me||{});S.chars=S.chars||[];S.over=S.over||{};if(S.me.accent==='#0a8f7a')S.me.accent='#1d9bf0';
-const save=()=>{try{localStorage.setItem('statusia',JSON.stringify(S))}catch(e){}};
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-function toast(t){const x=$('#toast');x.textContent=t;x.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>x.hidden=true,4000)}
-function ago(t){const m=Math.floor((Date.now()-t)/6e4);return m<1?'à l’instant':m<60?m+' min':m<1440?Math.floor(m/60)+' h':Math.floor(m/1440)+' j'}
-const roster=()=>all().map(c=>`${c.id}: ${c.n}, ${c.b}`).join('\n');
+    const NEW = {
+      lea: { n: "Léa | en transit", h: "@transit_lea", s: "travel", b: "backpackeuse de 27 ans, toujours dans un aéroport ou un train, adore les bons plans, râle sur les retards" },
+      max: { n: "Maxime", h: "@M4xLag", s: "game", b: "gamer de 24 ans sarcastique, accuse le lag pour tout, parle de jeux vidéo, répond court avec ironie" },
+      ami: { n: "Amina 🍋 cuisine", h: "@marmite_amina", s: "cook", b: "cuisine maison, partage recettes simples et astuces anti-gaspi, chaleureuse" },
+      hen: { n: "Henri Lefèvre", h: "@bibliophage_", s: "books", b: "prof d’histoire retraité, érudit pince-sans-rire, sort des faits surprenants, corrige les erreurs avec ironie" },
+      jad: { n: "Jade Coach", h: "@jade_sweat", s: "fit", b: "coach sportive très motivante, parle de séances et de nutrition simple" },
+      theo: { n: "Théo", h: "@theo_404", s: "code", b: "développeur backend de 29 ans, blagues de code, galères de prod, trop de café" },
+      nou: { n: "nour", h: "@nour_encre", s: "art", b: "illustratrice rêveuse qui écrit en minuscules, poétique, parle de dessin et de lumière" },
+      gus: { n: "Gus", h: "@arbitre_vendu", s: "foot", b: "supporter de foot de mauvaise foi, tout est la faute de l’arbitre, drôle et excessif" }
+    };
 
-/* ---------- Appel direct à une API d'IA (sans claude.ai) ---------- */
-const PROV={
-  gemini:{label:'Google Gemini (gratuit)',model:'gemini-3.6-flash',help:'Clé gratuite, sans carte bancaire : aistudio.google.com/apikey'},
-  anthropic:{label:'Anthropic Claude (payant)',model:'claude-haiku-5-5',help:'Clé à créer sur console.anthropic.com (facturation à l’usage).'}
-};
-const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||'';v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){}return ''};
-const API={
-  get prov(){const p=ls('statusia_prov');return PROV[p]?p:'gemini'},set prov(v){ls('statusia_prov',v)},
-  get key(){return ls('statusia_key_'+this.prov)},set key(v){ls('statusia_key_'+this.prov,v)},
-  get model(){return ls('statusia_model_'+this.prov)||PROV[this.prov].model},set model(v){ls('statusia_model_'+this.prov,v)}
-};
-async function sample(prompt,opt={}){
-  const p=API.prov,st=!!opt.onText,max=opt.max||2048,headers={'content-type':'application/json'};
-  let url,body;
-  if(p==='gemini'){
-    url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(API.model)+':'+(st?'streamGenerateContent?alt=sse':'generateContent');
-    headers['x-goog-api-key']=API.key;
-    body={contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:max}};
-  }else{
-    url='https://api.anthropic.com/v1/messages';
-    Object.assign(headers,{'x-api-key':API.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'});
-    body={model:API.model,max_tokens:max,stream:st,messages:[{role:'user',content:prompt}]};
-  }
-  const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
-  if(!res.ok){let m='';try{m=(await res.json()).error.message||''}catch(x){}
-    const e=new Error(m||('http '+res.status));
-    e.code=res.status===429?'rate_limited':(res.status===401||res.status===403||/api key/i.test(m))?'bad_key':(res.status===404||/model/i.test(m))?'bad_model':'http';throw e}
-  const pick=j=>p==='gemini'
-    ?((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[]).filter(x=>!x.thought).map(x=>x.text||'').join('')
-    :(j.content||[]).map(x=>x.text||'').join('');
-  const fail=()=>{const e=new Error('empty');e.code='empty';throw e};
-  if(!st){const t=pick(await res.json());if(!t)fail();return {text:t}}
-  const rd=res.body.getReader(),dec=new TextDecoder();let buf='',acc='';
-  for(;;){const {done,value}=await rd.read();if(done)break;
-    buf+=dec.decode(value,{stream:true});const lines=buf.split('\n');buf=lines.pop();
-    for(const l of lines){if(!l.startsWith('data:'))continue;
-      try{const j=JSON.parse(l.slice(5));let d='';
-        if(p==='gemini')d=pick(j);else if(j.type==='content_block_delta'&&j.delta&&j.delta.text)d=j.delta.text;
-        if(d){acc+=d;opt.onText({text:acc})}}catch(x){}}}
-  if(!acc)fail();
-  return {text:acc};
-}
-sample.json=async prompt=>{const t=(await sample(prompt,{max:2048})).text,m=t.match(/[\[{][\s\S]*[\]}]/);return JSON.parse(m?m[0]:t)};
-function aiError(e){const c=e&&e.code;toast(c==='rate_limited'?'Limite gratuite atteinte, patiente un instant.':c==='bad_key'?'Clé API refusée : vérifie-la dans Profil.':c==='bad_model'?'Modèle introuvable : change son nom dans Profil.':'Réponse IA impossible pour le moment.')}
-function needKey(){if(API.key)return false;toast('Ajoute ta clé API gratuite dans l’onglet Profil.');return true}
-async function ai(prompt){
-  if(needKey())return null;
-  try{return await sample.json(prompt)}
-  catch(e){aiError(e);return null}
-}
+    const SORTED = CH.map(c => ({ ...c, ...NEW[c.id] }));
+    const $ = (sel) => document.querySelector(sel);
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    const esc = (s) => String(s ?? "").replace(/[&<>\"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[m]));
+    const fmt = (n) => {
+      const value = Number(n || 0);
+      if (value >= 1_000_000) return (value / 1_000_000).toFixed(1).replace(".", ",") + " M";
+      if (value >= 10_000) return (value / 1_000).toFixed(1).replace(".", ",") + " k";
+      return value.toLocaleString("fr-FR");
+    };
+    const save = () => {
+      try { localStorage.setItem("statusia", JSON.stringify(S)); } catch (e) {}
+    };
+    const ls = (key, value) => {
+      try {
+        if (value === undefined) return localStorage.getItem(key) || "";
+        if (value === null || value === "") localStorage.removeItem(key);
+        else localStorage.setItem(key, value);
+      } catch (e) {}
+    };
 
-/* ---------- Fil ---------- */
-function render(){
-  const f=$('#feed');
-  if(!S.posts.length){f.innerHTML='<div class="empty">Ton fil est vide. Ajoute ta clé API gratuite dans l’onglet Profil, puis demande de nouvelles publications.</div>';return}
-  f.innerHTML=S.posts.map(p=>{
-    const c=p.who==='me'?meObj():byId(p.who);
-    const cms=p.cm.map(k=>{const a=k.who==='me'?meObj():byId(k.who);
-      return `<div class="c">${avh(a,'s')}<div><b>${esc(a.n)}</b> ${esc(k.text)}</div></div>`}).join('');
-    return `<article class="post" data-id="${p.id}">${avh(c,'')}<div class="body">
-    <div><span class="who">${esc(c.n)}</span>${c.v?BADGE:''} <span class="hd">${esc(c.h)} · ${ago(p.t)}</span></div>
-    <div class="txt">${esc(p.text)}</div>
-    <div class="acts"><button data-a="cm">${I.re} ${p.cm.length}</button><button data-a="rt" class="${p.rted?'rt':''}">${I.rt} ${p.rt||0}</button><button data-a="like" class="${p.liked?'on':''}">${I.h} ${p.likes}</button><span>${I.v} ${fmt((p.likes+1)*41+p.cm.length*13+(p.t%97))}</span></div>
-    ${openC[p.id]?`<div class="cm">${cms}<div class="row" style="margin-top:8px"><input type="text" placeholder="Répondre…" aria-label="Commentaire"><button class="btn" data-a="send">Envoyer</button></div></div>`:''}
-    </div></article>`}).join('');
-}
-async function newPosts(){
-  const b=$('#rf');b.disabled=true;b.textContent='Chargement…';
-  const r=await ai(`Réseau social fictif. Personnages:\n${roster()}\n\nÉcris 5 publications courtes (max 220 caractères), en français, de personnages différents, au ton réaliste d’un vrai réseau social français : spontané, familier, abréviations, ironie, opinions tranchées, parfois un emoji ou un hashtag, jamais un ton d’assistant. Réponds uniquement par un tableau JSON: [{"who":"id","text":"..."}]`);
-  if(Array.isArray(r)){r.forEach(x=>{if(byId(x.who)&&x.text)S.posts.unshift({id:uid(),who:x.who,text:String(x.text),t:Date.now(),likes:Math.floor(Math.random()*90),liked:false,cm:[]})});save();render()}
-  b.disabled=false;b.textContent='Nouvelles publications';
-}
-async function react(p,extra){
-  const thread=p.cm.map(k=>`${k.who==='me'?'Utilisateur':byId(k.who).n}: ${k.text}`).join('\n');
-  const au=p.who==='me'?'l’utilisateur '+S.me.name+(S.me.bio?' ('+S.me.bio+')':''):byId(p.who).n;
-  const r=await ai(`Réseau social fictif. Personnages:\n${roster()}\n\nPublication de ${au}: "${p.text}"\nCommentaires:\n${thread||'(aucun)'}\n${extra}\nRéponds uniquement par un JSON: {"likes":nombre entre 1 et 40,"comments":[{"who":"id","text":"..."}]} avec 1 à 3 commentaires courts en français, au ton réaliste de vrais utilisateurs (familier, ironie, parfois un emoji), dans la personnalité de chacun, en rebondissant sur ce qui vient d’être dit.`);
-  if(r&&Array.isArray(r.comments)){const lk=Math.max(0,Math.min(60,+r.likes||0));p.likes+=lk;if(p.who==='me'){S.me.followers+=Math.round(lk*(.3+Math.random()*.5));renderMe()}r.comments.forEach(k=>{if(byId(k.who)&&k.text)p.cm.push({who:k.who,text:String(k.text)})});save();render()}
-}
-async function publish(){
-  const t=$('#pt').value.trim();if(!t||busy)return;busy=true;$('#pb').disabled=true;
-  const p={id:uid(),who:'me',text:t,t:Date.now(),likes:0,liked:false,cm:[]};
-  S.posts.unshift(p);$('#pt').value='';save();render();
-  await react(p,'L’utilisateur vient de publier. Fais réagir des personnages.');
-  busy=false;$('#pb').disabled=false;
-}
-$('#feed').addEventListener('click',async e=>{
-  const bt=e.target.closest('button');if(!bt)return;
-  const el=bt.closest('.post'),p=S.posts.find(x=>x.id===el.dataset.id);if(!p)return;
-  if(bt.dataset.a==='like'){p.liked=!p.liked;p.likes+=p.liked?1:-1;save();render()}
-  if(bt.dataset.a==='cm'){openC[p.id]=!openC[p.id];render()}
-  if(bt.dataset.a==='rt'){p.rted=!p.rted;p.rt=(p.rt||0)+(p.rted?1:-1);save();render()}
-  if(bt.dataset.a==='send'){const i=el.querySelector('input'),t=i.value.trim();if(!t)return;
-    p.cm.push({who:'me',text:t});save();render();
-    await react(p,`L’utilisateur vient de commenter: "${t}". Fais répondre au moins l’auteur de la publication ou un personnage concerné.`)}
-});
-$('#pb').onclick=publish;$('#rf').onclick=newPosts;
+    let S = {
+      me: {
+        name: "Toi",
+        handle: "moi",
+        bio: "Je poste ce qui me passe par la tête.",
+        photo: "",
+        color: "#bfc7d1",
+        accent: "#1d9bf0",
+        followers: 120,
+        banner: "",
+        theme: "blue"
+      },
+      chars: [],
+      posts: [],
+      dms: {},
+      over: {}
+    };
 
-/* ---------- Messages (illimités) ---------- */
-function strip(){
-  $('#strip').innerHTML=all().map(c=>`<button role="tab" data-id="${c.id}" aria-selected="${c.id===cur}">${avh(c,'')}${esc(c.n.split(' ')[0])}</button>`).join('');
-}
-function msgs(){
-  if(!byId(cur))cur='lea';const h=S.dms[cur]||[],c=byId(cur),box=$('#msgs');$('#chead').innerHTML=avh(c,'s')+`<div><b>${esc(c.n)}</b><div class="hd">${esc(c.h)} · ${fmt(c.f||0)} abonnés</div></div>`;
-  box.innerHTML=h.length?h.map(m=>`<div class="m ${m.r}">${esc(m.text)}</div>`).join(''):`<div class="empty">Écris à ${esc(c.n)} (${c.h}). Aucune limite de messages.</div>`;
-  box.scrollTop=box.scrollHeight;
-}
-async function chat(){
-  const t=$('#mi').value.trim();if(!t||busy)return;
-  if(needKey())return;
-  busy=true;$('#mb').disabled=true;$('#mi').value='';
-  const id=cur,c=byId(id),h=S.dms[id]=S.dms[id]||[];
-  h.push({r:'me',text:t});save();msgs();
-  const ctx=h.slice(-40).map(m=>`${m.r==='me'?'Utilisateur':c.n}: ${m.text}`).join('\n');
-  const prompt=`Tu es ${c.n} (${c.h}), ${c.b}. Tu discutes en messages privés avec un utilisateur (${S.me.name}${S.me.bio?', '+S.me.bio:''}) sur un réseau social. Reste dans ton personnage, réponds en français comme sur un vrai réseau social : spontané, familier, abréviations et emojis parfois, 1 à 3 phrases, jamais un ton d’assistant, sans guillemets ni préfixe avec ton nom.\n\nConversation:\n${ctx}\n\nÉcris uniquement ta prochaine réponse.`;
-  const m={r:'ai',text:'…'};h.push(m);msgs();
-  try{
-    const r=await sample(prompt,{onText:({text})=>{m.text=text||'…';if(cur===id)msgs()}});
-    m.text=(r&&r.text)||m.text;
-  }catch(e){h.pop();aiError(e)}
-  save();if(cur===id)msgs();busy=false;$('#mb').disabled=false;
-}
-$('#strip').onclick=e=>{const b=e.target.closest('button');if(b){cur=b.dataset.id;strip();msgs()}};
-$('#mb').onclick=chat;
-$('#mi').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chat()}});
-$('#cl').onclick=()=>{if(confirm('Effacer cette conversation ?')){S.dms[cur]=[];save();msgs()}};
+    try {
+      const raw = localStorage.getItem("statusia");
+      if (raw) {
+        const next = JSON.parse(raw);
+        S = { ...S, ...next, me: { ...S.me, ...(next.me || {}) } };
+      }
+    } catch (e) {}
 
-/* ---------- Personnalisation ---------- */
-const meObj=()=>({n:S.me.name||'Toi',h:'@'+(S.me.handle||'moi'),e:'🙂',c:S.me.color,p:S.me.photo});
-const fmt=n=>n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M':n>=1e4?(n/1e3).toFixed(1).replace('.',',')+' k':Math.round(n).toLocaleString('fr-FR');
-function avh(c,k){return `<div class="av ${k||''}" style="background:${esc(c.c)}">${(()=>{const u=c.p||S.over[c.id]||(c.s&&SC[c.s]);return u?`<img src="${esc(u)}" alt="">`:esc(c.e)})()}</div>`}
-function applyTheme(){const a=S.me.accent||'#0a8f7a',r=document.documentElement.style,n=parseInt(a.slice(1),16),l=(.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255;
-  r.setProperty('--acc',a);r.setProperty('--me',a);r.setProperty('--acc-ink',l>.6?'#111':'#fff')}
-function renderMe(){const m=meObj();$('#meAv').innerHTML=avh(m,'');$('#pAv').innerHTML=avh(m,'');
-  $('#pName').textContent=m.n+' '+m.h;$('#pStat').textContent=fmt(S.me.followers)+' abonnés · '+S.posts.filter(p=>p.who==='me').length+' publications'}
-function fillMe(){const m=S.me;$('#fName').value=m.name;$('#fHandle').value=m.handle;$('#fBio').value=m.bio;$('#fColor').value=m.color;$('#fAcc').value=m.accent;$('#fFol').value=m.followers;aiFields();myChars()}
-function readPhoto(f){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const i=new Image();i.onerror=no;i.onload=()=>{const s=Math.min(i.width,i.height),c=document.createElement('canvas');c.width=c.height=160;c.getContext('2d').drawImage(i,(i.width-s)/2,(i.height-s)/2,s,s,0,0,160,160);ok(c.toDataURL('image/jpeg',.82))};i.src=r.result};r.readAsDataURL(f)})}
-const upd=(k,v)=>{S.me[k]=v;save();renderMe();render()};
-$('#fName').oninput=e=>upd('name',e.target.value);
-$('#fHandle').oninput=e=>upd('handle',e.target.value.replace(/[^a-zA-Z0-9_]/g,''));
-$('#fBio').oninput=e=>{S.me.bio=e.target.value;save()};
-$('#fFol').oninput=e=>upd('followers',Math.max(0,parseInt(e.target.value)||0));
-$('#fKey').oninput=e=>{API.key=e.target.value.trim()};
-$('#fModel').oninput=e=>{API.model=e.target.value.trim()};
-$('#fProv').onchange=e=>{API.prov=e.target.value;aiFields()};
-function aiFields(){$('#fProv').value=API.prov;$('#fKey').value=API.key;$('#fModel').value=API.model;$('#fModel').placeholder=PROV[API.prov].model;$('#fHelp').textContent=PROV[API.prov].help}
-$('#fColor').oninput=e=>upd('color',e.target.value);
-$('#fAcc').oninput=e=>{S.me.accent=e.target.value;save();applyTheme()};
-$('#fPhoto').onchange=async e=>{const f=e.target.files[0];if(f)try{upd('photo',await readPhoto(f))}catch(x){toast('Image illisible.')}};
-$('#fNoPhoto').onclick=()=>upd('photo','');
-let newPhoto='';
-$('#cPhoto').onchange=async e=>{const f=e.target.files[0];if(f)try{newPhoto=await readPhoto(f);toast('Photo prête.')}catch(x){toast('Image illisible.')}};
-$('#cMake').onclick=()=>{
-  const n=$('#cName').value.trim(),b=$('#cBio').value.trim();
-  if(!n||!b){toast('Ajoute un nom et une personnalité.');return}
-  const h=($('#cHandle').value.trim()||n).toLowerCase().replace(/[^a-z0-9_]/g,'')||'perso';
-  S.chars.push({id:'c'+uid(),n,h:'@'+h,e:[...$('#cEmoji').value.trim()][0]||'🙂',c:$('#cColor').value,p:newPhoto,b,f:Math.max(0,parseInt($('#cFol').value)||0)});
-  save();['#cName','#cHandle','#cBio','#cEmoji','#cFol','#cPhoto'].forEach(s=>$(s).value='');newPhoto='';myChars();toast(n+' a rejoint le réseau.')};
-function myChars(){allChars();const l=S.chars,b=$('#myChars');
-  b.innerHTML=l.length?l.map(c=>`<div class="mine">${avh(c,'')}<div><b>${esc(c.n)}</b><div class="hd">${esc(c.h)} · ${fmt(c.f)} abonnés</div></div><button class="btn ghost" data-a="chat" data-id="${c.id}">Écrire</button><button class="btn ghost" data-a="del" data-id="${c.id}">Supprimer</button></div>`).join(''):'<div class="hd">Aucun personnage créé pour l’instant.</div>'}
-$('#myChars').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.id;
-  if(b.dataset.a==='chat'){cur=id;tab('M')}
-  if(b.dataset.a==='del'&&confirm('Supprimer ce personnage et ses publications ?')){
-    S.chars=S.chars.filter(c=>c.id!==id);S.posts=S.posts.filter(p=>p.who!==id);S.posts.forEach(p=>p.cm=p.cm.filter(k=>k.who!==id));delete S.dms[id];if(cur===id)cur='lea';save();render();myChars()}};
+    const all = () => [...SORTED, ...(S.chars || [])];
+    const byId = (id) => all().find(c => c.id === id);
 
-/* ---------- Style X ---------- */
-const BADGE=`<svg class='vb' viewBox='0 0 24 24'><path d='M12 2l2.4 2 3.1-.2 1 3 2.6 1.8-1 3 1 3-2.6 1.8-1 3-3.1-.2L12 22l-2.4-2-3.1.2-1-3L2.9 15.4l1-3-1-3 2.6-1.8 1-3 3.1.2z' fill='#1d9bf0'/><path d='M8 12l3 3 5-6' stroke='#fff' stroke-width='2' fill='none'/></svg>`;
-const ic=d=>`<svg viewBox='0 0 24 24'><path d='${d}'/></svg>`;
-const I={re:ic('M4 5h16v11H9l-5 4z'),rt:ic('M4 9l3-3 3 3M7 6v9a3 3 0 003 3h6M20 15l-3 3-3-3M17 18V9a3 3 0 00-3-3H8'),h:ic('M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z'),v:ic('M5 20V10M12 20V4M19 20v-7')};
-const sv=(a,b,x)=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${a}'/><stop offset='1' stop-color='${b}'/></linearGradient></defs><rect width='100' height='100' fill='url(#g)'/>${x}</svg>`);
-const SC={
-travel:sv('#f6a56a','#f7d9a8',`<circle cx='70' cy='32' r='12' fill='#fff6d8'/><path d='M0 100V68l25-24 22 26 18-14 35 30V100z' fill='#3a5a6e'/><path d='M0 100V84l30-16 30 18 40-14V100z' fill='#1f3342'/>`),
-game:sv('#1a1033','#4b1f7a',`<path d='M0 70h100M0 82h100M0 94h100M20 60L0 100M50 60v40M80 60l20 40' stroke='#ff4fd8' stroke-width='1.5' fill='none'/><circle cx='50' cy='38' r='16' fill='#00e5ff' opacity='.85'/>`),
-cook:sv('#7a2e1a','#d9803a',`<circle cx='50' cy='52' r='34' fill='#f4efe6'/><circle cx='50' cy='52' r='24' fill='#c0451f'/><circle cx='42' cy='46' r='5' fill='#6fa03b'/><circle cx='58' cy='56' r='5' fill='#f2c94c'/><circle cx='48' cy='62' r='4' fill='#6fa03b'/>`),
-books:sv('#3b2a1a','#7a5a38',`<rect x='12' y='30' width='14' height='52' fill='#a23e3e'/><rect x='28' y='22' width='12' height='60' fill='#3e6aa2'/><rect x='42' y='34' width='16' height='48' fill='#d6b04a'/><rect x='60' y='26' width='12' height='56' fill='#4a8a5a'/><rect x='74' y='36' width='14' height='46' fill='#8a4a8a'/><rect x='6' y='82' width='88' height='6' fill='#2a1c10'/>`),
-fit:sv('#101820','#2c3e50',`<rect x='18' y='46' width='64' height='8' fill='#cfd8dc'/><rect x='10' y='34' width='10' height='32' rx='3' fill='#ff5252'/><rect x='22' y='38' width='8' height='24' rx='3' fill='#ff8a80'/><rect x='80' y='34' width='10' height='32' rx='3' fill='#ff5252'/><rect x='70' y='38' width='8' height='24' rx='3' fill='#ff8a80'/>`),
-code:sv('#0d1117','#161b22',`<g fill='none' stroke-linecap='round' stroke-width='5'><path d='M30 34L14 50l16 16' stroke='#58a6ff'/><path d='M70 34l16 16-16 16' stroke='#58a6ff'/><path d='M56 28L44 72' stroke='#3fb950'/></g>`),
-art:sv('#f8e1f4','#cfe3ff',`<circle cx='36' cy='40' r='20' fill='#ff7aa8' opacity='.85'/><circle cx='62' cy='48' r='22' fill='#6ec1ff' opacity='.8'/><circle cx='50' cy='66' r='18' fill='#ffd45e' opacity='.85'/>`),
-foot:sv('#1f7a3a','#2fa04f',`<path d='M0 50h100M32 50a18 18 0 1 0 36 0a18 18 0 1 0-36 0M0 20h14v60H0M100 20H86v60h14' stroke='#fff' stroke-width='2' fill='none' opacity='.8'/><circle cx='50' cy='50' r='7' fill='#fff'/>`)};
-let phId='';
-function allChars(){$('#allChars').innerHTML=all().map(c=>`<div class='mine'>${avh(c,'')}<div><b>${esc(c.n)}</b><div class='hd'>${esc(c.h)}</div></div><button class='btn ghost' data-a='ph' data-id='${c.id}'>Changer la photo</button>${(S.over[c.id]||c.p)?`<button class='btn ghost' data-a='rp' data-id='${c.id}'>Réinitialiser</button>`:''}</div>`).join('')}
-$('#allChars').onclick=e=>{const b=e.target.closest('button');if(!b)return;const id=b.dataset.id;
-  if(b.dataset.a==='ph'){phId=id;$('#ph').click()}
-  if(b.dataset.a==='rp'){delete S.over[id];const k=S.chars.find(c=>c.id===id);if(k)k.p='';save();render();myChars()}};
-$('#ph').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!phId)return;
-  try{const u=await readPhoto(f),k=S.chars.find(c=>c.id===phId);if(k)k.p=u;else S.over[phId]=u;save();render();myChars()}catch(x){toast('Image illisible.')}};
+    const meObj = () => ({
+      n: S.me.name || "Toi",
+      h: "@" + (S.me.handle || "moi"),
+      e: "🙂",
+      c: S.me.color || "#bfc7d1",
+      p: S.me.photo || "",
+      id: "me"
+    });
 
-/* ---------- Onglets ---------- */
-function tab(m){
-  $('#vF').hidden=m!=='F';$('#vM').hidden=m!=='M';$('#vP').hidden=m!=='P';
-  $('#tF').setAttribute('aria-selected',m==='F');$('#tM').setAttribute('aria-selected',m==='M');$('#tP').setAttribute('aria-selected',m==='P');
-  if(m==='M'){strip();msgs()}
-  if(m==='P'){fillMe();renderMe()}
-}
-$('#tF').onclick=()=>tab('F');$('#tM').onclick=()=>tab('M');$('#tP').onclick=()=>tab('P');
-render();
-applyTheme();renderMe();
-if(!S.posts.length&&API.key)setTimeout(newPosts,300);
-</script>
+    function toast(msg) {
+      const el = $("#toast");
+      el.textContent = msg;
+      el.hidden = false;
+      clearTimeout(toast.t);
+      toast.t = setTimeout(() => el.hidden = true, 3200);
+    }
+
+    function ago(ts) {
+      const s = Math.max(0, Math.floor((Date.now() - ts) / 60000));
+      if (s < 1) return "à l’instant";
+      if (s < 60) return s + " min";
+      if (s < 1440) return Math.floor(s / 60) + " h";
+      return Math.floor(s / 1440) + " j";
+    }
+
+    function avh(c, cls = "") {
+      const src = c.p || S.over[c.id] || (c.s && SC[c.s]);
+      return `
+        <div class="av ${cls}" style="background:${c.c || '#dbeafe'}">
+          ${src ? `<img src="${esc(src)}" alt="">` : esc(c.e || "🙂")}
+        </div>
+      `;
+    }
+
+    const BADGE = `
+      <svg class="vb" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l2.4 2 3.1-.2 1 3 2.6 1.8-1 3 1 3-2.6 1.8-1 3-3.1-.2L12 22l-2.4-2-3.1.2-1-3L2.9 15.4l1-3-1-3 2.6-1.8 1-3 3.1.2z" fill="#1d9bf0"/>
+        <path d="M8 12l3 3 5-6" stroke="#fff" stroke-width="2" fill="none" />
+      </svg>
+    `;
+
+    const I = {
+      re: ` <svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg> `,
+      rt: ` <svg viewBox="0 0 24 24"><path d="M4 9l3-3 3 3M7 6v9a3 3 0 003 3h6M20 15l-3 3-3-3M17 18V9a3 3 0 00-3-3H8"/></svg> `,
+      h: ` <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z"/></svg> `,
+      v: ` <svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg> `
+    };
+
+    function roster() {
+      return all().map(c => `${c.id}: ${c.n}, ${c.b}`).join("\n");
+    }
+
+    function renderTheme() {
+      const theme = S.me.theme || "blue";
+      document.documentElement.dataset.theme = theme;
+      $("#fTheme").value = theme;
+      document.documentElement.style.colorScheme = theme === "black" ? "dark" : "light";
+    }
+
+    function setTheme(theme) {
+      const valid = ["blue", "black", "pink", "white", "yellow"];
+      const selected = valid.includes(theme) ? theme : "blue";
+      S.me.theme = selected;
+      save();
+      renderTheme();
+    }
+
+    function renderBanner(){
+      const b = $("#banner");
+      if (!b) return;
+      if (S.me.banner) {
+        b.style.backgroundImage = `url("${S.me.banner}")`;
+        b.style.backgroundSize = "cover";
+        b.style.backgroundPosition = "center";
+      } else {
+        b.style.backgroundImage = "";
+        b.style.background = "linear-gradient(135deg, #dfeaf9, #f5d0fe)";
+      }
+    }
+
+    function renderMe() {
+      const m = meObj();
+      $("#meAv").innerHTML = avh(m, "");
+      $("#pAv").innerHTML = avh(m, "");
+      $("#pName").textContent = m.n + " " + m.h;
+      $("#pStat").textContent = fmt(S.me.followers) + " abonnés · " + S.posts.filter(p => p.who === "me").length + " publications";
+      renderBanner();
+      renderTheme();
+    }
+
+    function fillMe(){
+      $("#fName").value = S.me.name || "";
+      $("#fHandle").value = S.me.handle || "";
+      $("#fBio").value = S.me.bio || "";
+      $("#fFol").value = S.me.followers || 0;
+      $("#fColor").value = S.me.color || "#bfc7d1";
+      $("#fAcc").value = S.me.accent || "#1d9bf0";
+      $("#fTheme").value = S.me.theme || "blue";
+      aiFields();
+      myChars();
+    }
+
+    function updateMe(key, value){
+      S.me[key] = value;
+      save();
+      renderMe();
+    }
+
+    function readPhoto(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const size = 180;
+            const canvas = document.createElement("canvas");
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext("2d");
+            const sx = Math.min(img.width, img.height);
+            const x = (img.width - sx) / 2;
+            const y = (img.height - sx) / 2;
+            ctx.drawImage(img, x, y, sx, sx, 0, 0, size, size);
+            resolve(canvas.toDataURL("image/jpeg", 0.82));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function readBanner(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = reject;
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const maxW = 1200, maxH = 360;
+            let w = img.width, h = img.height;
+            const ratio = Math.min(maxW / w, maxH / h, 1);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL("image/jpeg", 0.8));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    const PROV = {
+      gemini: {
+        label: "Google Gemini (gratuit)",
+        model: "gemini-2.0-flash",
+        help: "Crée ta clé API gratuite sur Google AI Studio"
+      },
+      anthropic: {
+        label: "Anthropic Claude (payant)",
+        model: "claude-3-5-haiku-20241022",
+        help: "Crée une clé sur console.anthropic.com"
+      }
+    };
+
+    const API = {
+      get prov(){ return ls("statusia_prov") || "gemini"; },
+      set prov(v){ ls("statusia_prov", v); },
+      get key(){ return ls("statusia_key_" + (ls("statusia_prov") || "gemini")); },
+      set key(v){ ls("statusia_key_" + (ls("statusia_prov") || "gemini"), v); },
+      get model(){ return ls("statusia_model_" + (ls("statusia_prov") || "gemini")) || PROV[(ls("statusia_prov") || "gemini")].model; },
+      set model(v){ ls("statusia_model_" + (ls("statusia_prov") || "gemini"), v); }
+    };
+
+    function aiFields() {
+      $("#fProv").value = API.prov;
+      $("#fKey").value = API.key;
+      $("#fModel").value = API.model;
+      $("#fHelp").textContent = PROV[API.prov].help;
+    }
+
+    function needKey() {
+      if (API.key) return false;
+      toast("Ajoute ta clé API dans le profil.");
+      return true;
+    }
+
+    async function sample(prompt, opt = {}) {
+      const provider = API.prov || "gemini";
+      const headers = { "content-type": "application/json" };
+      const key = API.key;
+      const model = API.model;
+
+      if (!key) throw new Error("missing_key");
+
+      if (provider === "gemini") {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+        const body = {
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: Math.min(opt.max || 800, 2048) }
+        };
+        const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error?.message || "gemini_error");
+        }
+        const json = await res.json();
+        const text = json?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
+        if (!text) throw new Error("empty_response");
+        return { text };
+      }
+
+      const url = "https://api.anthropic.com/v1/messages";
+      headers["x-api-key"] = key;
+      headers["anthropic-version"] = "2023-06-01";
+      const body = {
+        model,
+        max_tokens: Math.min(opt.max || 800, 4096),
+        messages: [{ role: "user", content: prompt }]
+      };
+      const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || "anthropic_error");
+      }
+      const json = await res.json();
+      const text = (json.content || []).map(c => c.text || "").join("");
+      if (!text) throw new Error("empty_response");
+      return { text };
+    }
+
+    async function ai(prompt) {
+      if (needKey()) return null;
+      try {
+        const result = await sample(prompt, { max: 1200 });
+        const text = result.text.trim();
+        try {
+          const parsed = JSON.parse(text);
+          return parsed;
+        } catch {
+          const match = text.match(/[\[{].*[\]}]/s);
+          if (match) {
+            try { return JSON.parse(match[0]); } catch {}
+          }
+          return null;
+        }
+      } catch (e) {
+        toast("Erreur IA : vérifie ta clé API et le modèle.");
+        return null;
+      }
+    }
+
+    function sentiment(text) {
+      const t = String(text).toLowerCase();
+      const positive = ["bien","super","top","excellent","amazing","adorable","génial","cool","merci","j’aime","je kiffe","magnifique","parfait","sûr","heureux","content","wow","sublime"];
+      const negative = ["mauvais","nul","horrible","détestable","moche","gênant","pitoyable","ennuyeux","dégueulasse","raté","barbare","vide","moche","nul","pénible","bof"];
+      let score = 0;
+      positive.forEach(w => { if (t.includes(w)) score += 1; });
+      negative.forEach(w => { if (t.includes(w)) score -= 1; });
+      if (score > 0) return "positive";
+      if (score < 0) return "negative";
+      return "neutral";
+    }
+
+    function randomFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function renderFeed() {
+      const el = $("#feed");
+      if (!S.posts.length) {
+        el.innerHTML = '<div class="empty">Ton fil est vide. Publie quelque chose pour lancer la chaîne de réactions.</div>';
+        return;
+      }
+      el.innerHTML = S.posts.map(post => {
+        const author = post.who === "me" ? meObj() : byId(post.who) || { n: "Inconnu", h: "@inconnu", e: "?", c: "#dfeaf9" };
+        const comments = (post.cm || []).map(c => {
+          const actor = c.who === "me" ? meObj() : byId(c.who) || { n: "IA", h: "@ia", e: "🤖", c: "#c7d2fe" };
+          return `
+            <div class="c">
+              ${avh(actor, "s")}
+              <div><b>${esc(actor.n)}</b> ${esc(c.text)}</div>
+            </div>
+          `;
+        }).join("");
+
+        const isOpen = !!openC[post.id];
+        return `
+          <article class="post" data-id="${post.id}">
+            ${avh(author, "")}
+            <div class="body">
+              <div><span class="who">${esc(author.n)}</span> <span class="hd">${esc(author.h || "@user")} · ${ago(post.t)}</span></div>
+              <div class="txt">${esc(post.text)}</div>
+              <div class="acts">
+                <button data-a="cm" type="button">${I.re} ${post.cm.length}</button>
+                <button data-a="rt" class="${post.rted ? "rt" : ""}" type="button">${I.rt} ${post.rt || 0}</button>
+                <button data-a="like" class="${post.liked ? "on" : ""}" type="button">${I.h} ${post.likes || 0}</button>
+                <span>${I.v} ${fmt((post.likes || 0) + (post.cm || []).length * 14 + (post.rt || 0) * 12)}</span>
+              </div>
+              ${isOpen ? `<div class="cm">${comments}<div class="row" style="margin-top:8px"><input type="text" placeholder="Répondre…" aria-label="Commentaire"><button class="btn" data-a="send" type="button">Envoyer</button></div></div>` : ""}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function reactToPost(post, reason = "") {
+      const author = post.who === "me" ? meObj() : byId(post.who) || { n: "Inconnu", h: "@inconnu", e: "🤖", c: "#c7d2fe" };
+      const prompt = `
+      Tu es sur un réseau social réaliste. 
+      Personnages : ${roster()}
+      Publication actuelle de ${author.n} (${author.h}): "${post.text}"
+      Contexte supplémentaire : "${reason || ""}"
+      Réponds uniquement en JSON :
+      {"comments":[{"who":"id","text":"..."}],"likes": 1}
+      - 1 à 3 commentaires courts, très naturels, français, souvent familiers, parfois humoristiques.
+      - Les commentaires doivent venir de personnages différents.
+      - Certains commentaires peuvent être positifs, d’autres négatifs selon le contenu.
+      - Les réactions doivent être crédibles et alignées avec la personnalité.
+      `;
+
+      return ai(prompt).then(result => {
+        if (!result || !Array.isArray(result.comments)) return;
+        const comments = result.comments.filter(c => byId(c.who) && c.text);
+        comments.forEach(c => {
+          post.cm.push({ who: c.who, text: String(c.text) });
+        });
+        post.likes = Math.max(0, (post.likes || 0) + (Number(result.likes) || 0));
+        save();
+        renderFeed();
+      }).catch(() => {});
+    }
+
+    function publish() {
+      const text = $("#pt").value.trim();
+      if (!text) return;
+      const post = {
+        id: uid(),
+        who: "me",
+        text,
+        t: Date.now(),
+        likes: 0,
+        liked: false,
+        rt: 0,
+        rted: false,
+        cm: []
+      };
+      S.posts.unshift(post);
+      save();
+      renderFeed();
+      $("#pt").value = "";
+      setTimeout(() => reactToPost(post, "L’utilisateur vient de publier. Les personnages réagissent selon le contenu."), 300);
+      setTimeout(() => publishAIReactionAfterUser(post), 1200);
+    }
+
+    function publishAIReactionAfterUser(post) {
+      const kind = sentiment(post.text);
+      if (kind === "negative") {
+        const complaintText = randomFrom([
+          "Ça manque vraiment de bon sens.",
+          "Je suis pas d’accord, c’est assez limite.",
+          "Franchement, je vois pas pourquoi ça plaît autant.",
+          "Là, il faut être honnête : c’est pas le meilleur avis."
+        ]);
+        const complaintAuthor = randomFrom(all());
+        if (complaintAuthor) {
+          S.posts.unshift({
+            id: uid(),
+            who: complaintAuthor.id,
+            text: complaintText,
+            t: Date.now(),
+            likes: 5,
+            liked: false,
+            rt: 0,
+            rted: false,
+            cm: []
+          });
+        }
+      } else if (kind === "positive") {
+        const praiseText = randomFrom([
+          "J’aime bien cette idée, c’est vraiment solide.",
+          "Ça fait du sens, bravo.",
+          "C’est exactement le genre de pensée que j’aime.",
+          "Super message, ça donne du positif."
+        ]);
+        const praiseAuthor = randomFrom(all());
+        if (praiseAuthor) {
+          S.posts.unshift({
+            id: uid(),
+            who: praiseAuthor.id,
+            text: praiseText,
+            t: Date.now(),
+            likes: 9,
+            liked: false,
+            rt: 0,
+            rted: false,
+            cm: []
+          });
+        }
+      }
+      save();
+      renderFeed();
+    }
+
+    function aiBurst() {
+      if (!API.key) return;
+      const pool = all();
+      if (!pool.length) return;
+      const picks = [];
+      for (let i = 0; i < 3; i++) {
+        const actor = randomFrom(pool);
+        if (actor) picks.push(actor);
+      }
+      const msgTemplates = [
+        "Je suis d’accord, c’est une bonne réflexion.",
+        "Pas mal, mais on peut faire mieux.",
+        "Ça me parle un peu, même si je ne suis pas 100% d’accord.",
+        "Franchement, je vois le point.",
+        "C’est un peu excessif, mais c’est intéressant.",
+        "Ça semble vrai, surtout en pratique."
+      ];
+      picks.forEach((actor, idx) => {
+        setTimeout(() => {
+          const text = randomFrom(msgTemplates) + " #" + (idx + 1);
+          S.posts.unshift({
+            id: uid(),
+            who: actor.id,
+            text,
+            t: Date.now(),
+            likes: 3 + Math.floor(Math.random() * 9),
+            liked: false,
+            rt: 0,
+            rted: false,
+            cm: []
+          });
+          save();
+          renderFeed();
+        }, idx * 900);
+      });
+    }
+
+    let nextStreamTimer = null;
+    function scheduleNextStream() {
+      clearTimeout(nextStreamTimer);
+      const delay = 6000 + Math.random() * 12000;
+      nextStreamTimer = setTimeout(() => {
+        if (Math.random() < 0.85) aiBurst();
+        const count = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < count; i++) {
+          setTimeout(() => {
+            const actor = randomFrom(all());
+            if (!actor) return;
+            const templates = [
+              "Le vrai problème, c’est le manque de cohérence.",
+              "J’aime ce point de vue.",
+              "Je suis partagé, mais ça a du sens.",
+              "Perso, je trouve que ça aide beaucoup.",
+              "C’est pas faux, même si ça dépend du contexte.",
+              "Là j’ai envie de dire oui, mais avec nuance."
+            ];
+            S.posts.unshift({
+              id: uid(),
+              who: actor.id,
+              text: randomFrom(templates),
+              t: Date.now(),
+              likes: 2 + Math.floor(Math.random() * 12),
+              liked: false,
+              rt: 0,
+              rted: false,
+              cm: []
+            });
+            save();
+            renderFeed();
+          }, i * 700);
+        }
+        scheduleNextStream();
+      }, delay);
+    }
+
+    function renderMessages() {
+      const id = cur;
+      const actor = byId(id) || byId("lea");
+      const messages = S.dms[id] || [];
+      $("#msgs").innerHTML = messages.length
+        ? messages.map(m => `<div class="m ${m.r === "me" ? "me" : "ai"}">${esc(m.text)}</div>`).join("")
+        : `<div class="empty">Écris à ${esc(actor.n)}.</div>`;
+
+      $("#chead").innerHTML = `
+        ${avh(actor, "s")}
+        <div>
+          <b>${esc(actor.n)}</b>
+          <div class="hd">${esc(actor.h)} · ${fmt(actor.f || 0)} abonnés</div>
+        </div>
+      `;
+      const box = $("#msgs");
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function strip() {
+      const list = all();
+      $("#strip").innerHTML = list.map(c => `
+        <button role="tab" data-id="${c.id}" aria-selected="${c.id === cur}" type="button">
+          ${avh(c, "s")}
+          <span>${esc(c.n.split(" ")[0])}</span>
+        </button>
+      `).join("");
+    }
+
+    let cur = "lea";
+    let openC = {};
+    let busy = false;
+
+    async function sendMessage() {
+      const text = $("#mi").value.trim();
+      if (!text || busy) return;
+      if (needKey()) return;
+      busy = true;
+      $("#mb").disabled = true;
+      const id = cur;
+      const actor = byId(id) || byId("lea");
+      const list = S.dms[id] || [];
+      list.push({ r: "me", text });
+      S.dms[id] = list;
+      save();
+      renderMessages();
+      $("#mi").value = "";
+
+      const prompt = `
+      Tu es ${actor.n} (${actor.h}), ${actor.b}.
+      Tu discutes avec l’utilisateur sur un réseau social.
+      Réponds comme quelqu’un de réel, spontanément, en français, 1 à 3 phrases, sans ton d’assistant.
+      Conversation :
+      ${list.map(m => `${m.r === "me" ? "Utilisateur" : actor.n}: ${m.text}`).join("\n")}
+      Réponds uniquement avec le texte du prochain message.
+      `;
+
+      try {
+        const res = await sample(prompt, { max: 400 });
+        const answer = res.text.trim();
+        list.push({ r: "ai", text: answer || "..." });
+      } catch {
+        toast("Le message n’a pas pu être envoyé.");
+      }
+
+      save();
+      renderMessages();
+      busy = false;
+      $("#mb").disabled = false;
+    }
+
+    function tab(name) {
+      $("#vF").hidden = name !== "F";
+      $("#vM").hidden = name !== "M";
+      $("#vP").hidden = name !== "P";
+      $("#tF").setAttribute("aria-selected", name === "F");
+      $("#tM").setAttribute("aria-selected", name === "M");
+      $("#tP").setAttribute("aria-selected", name === "P");
+
+      if (name === "M") {
+        strip();
+        renderMessages();
+      }
+      if (name === "P") {
+        fillMe();
+      }
+    }
+
+    function myChars() {
+      const list = S.chars || [];
+      $("#myChars").innerHTML = list.length
+        ? list.map(c => `
+          <div class="mine">
+            ${avh(c, "")}
+            <div>
+              <b>${esc(c.n)}</b>
+              <div class="hd">${esc(c.h)} · ${fmt(c.f || 0)} abonnés</div>
+            </div>
+            <button class="btn ghost" data-a="chat" data-id="${c.id}" type="button">Écrire</button>
+            <button class="btn ghost" data-a="del" data-id="${c.id}" type="button">Supprimer</button>
+          </div>
+        `).join("")
+        : '<div class="hd">Aucun personnage créé pour l’instant.</div>';
+
+      $("#allChars").innerHTML = all().map(c => `
+        <div class="mine">
+          ${avh(c, "")}
+          <div>
+            <b>${esc(c.n)}</b>
+            <div class="hd">${esc(c.h)}</div>
+          </div>
+          <button class="btn ghost" data-a="ph" data-id="${c.id}" type="button">Changer la photo</button>
+          ${(S.over[c.id] || c.p) ? `<button class="btn ghost" data-a="rp" data-id="${c.id}" type="button">Réinitialiser</button>` : ""}
+        </div>
+      `).join("");
+    }
+
+    function createCharacter() {
+      const name = $("#cName").value.trim();
+      const bio = $("#cBio").value.trim();
+      if (!name || !bio) {
+        toast("Ajoute un nom et une personnalité.");
+        return;
+      }
+
+      const handle = ($("#cHandle").value.trim() || name).toLowerCase().replace(/[^a-z0-9_]/g, "") || "perso";
+      const emoji = $("#cEmoji").value.trim().slice(0, 4) || "🙂";
+      const color = $("#cColor").value || "#f3dff0";
+      const followers = Math.max(0, parseInt($("#cFol").value || "1000", 10) || 0);
+      const photo = localStorage.getItem("statusia_new_character_photo") || "";
+
+      S.chars.push({
+        id: "c" + uid(),
+        n: name,
+        h: "@" + handle,
+        e: emoji,
+        c: color,
+        b: bio,
+        f: followers,
+        p: photo
+      });
+
+      localStorage.removeItem("statusia_new_character_photo");
+      $("#cName").value = "";
+      $("#cHandle").value = "";
+      $("#cBio").value = "";
+      $("#cEmoji").value = "";
+      $("#cFol").value = "";
+      $("#cColor").value = "#f3dff0";
+      document.getElementById("cPhoto").value = "";
+      save();
+      myChars();
+      renderFeed();
+      toast(name + " a rejoint le réseau.");
+    }
+
+    async function handleFileToMemory(input, key) {
+      const file = input.files[0];
+      if (!file) return;
+      try {
+        const data = await readPhoto(file);
+        localStorage.setItem(key, data);
+        toast("Photo préparée.");
+      } catch {
+        toast("Image illisible.");
+      }
+    }
+
+    function initEvents() {
+      $("#pb").onclick = publish;
+      $("#rf").onclick = () => {
+        if (!API.key) { toast("Ajoute ta clé API dans le profil."); return; }
+        const templates = [
+          "Je suis d’accord, c’est une bonne idée.",
+          "Ça a du sens, et je trouve ça sympa.",
+          "C’est intéressant, je vois le bon côté.",
+          "Pas mal du tout, ça vaut la peine d’en parler.",
+          "J’aime bien cette énergie."
+        ];
+        const actor = randomFrom(all());
+        const msg = randomFrom(templates);
+        S.posts.unshift({
+          id: uid(),
+          who: actor.id,
+          text: msg,
+          t: Date.now(),
+          likes: 7 + Math.floor(Math.random() * 18),
+          liked: false,
+          rt: 0,
+          rted: false,
+          cm: []
+        });
+        save();
+        renderFeed();
+      };
+
+      $("#feed").addEventListener("click", (e) => {
+        const el = e.target.closest(".post");
+        if (!el) return;
+
+        const post = S.posts.find(p => p.id === el.dataset.id);
+        if (!post) return;
+
+        const btn = e.target.closest("button");
+        if (!btn) {
+          openC[post.id] = !openC[post.id];
+          renderFeed();
+          return;
+        }
+
+        const action = btn.dataset.a;
+        if (action === "like") {
+          post.liked = !post.liked;
+          post.likes = Math.max(0, (post.likes || 0) + (post.liked ? 1 : -1));
+          save();
+          renderFeed();
+        }
+        if (action === "cm") {
+          openC[post.id] = !openC[post.id];
+          renderFeed();
+        }
+        if (action === "rt") {
+          post.rted = !post.rted;
+          post.rt = (post.rt || 0) + (post.rted ? 1 : -1);
+          save();
+          renderFeed();
+        }
+        if (action === "send") {
+          const input = el.querySelector("input");
+          const value = input.value.trim();
+          if (!value) return;
+          post.cm.push({ who: "me", text: value });
+          save();
+          renderFeed();
+          reactToPost(post, `L’utilisateur vient de commenter : "${value}". Fais répondre au moins l’auteur de la publication ou un personnage concerné.`);
+        }
+      });
+
+      $("#strip").addEventListener("click", e => {
+        const button = e.target.closest("button[data-id]");
+        if (!button) return;
+        cur = button.dataset.id;
+        strip();
+        renderMessages();
+      });
+
+      $("#mb").onclick = sendMessage;
+      $("#mi").addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      $("#cl").onclick = () => {
+        if (!confirm("Effacer cette conversation ?")) return;
+        S.dms[cur] = [];
+        save();
+        renderMessages();
+      };
+
+      $("#tF").onclick = () => tab("F");
+      $("#tM").onclick = () => tab("M");
+      $("#tP").onclick = () => tab("P");
+
+      $("#editProfile").onclick = () => {
+        $("#profileEdit").hidden = !$("#profileEdit").hidden;
+        if (!$("#profileEdit").hidden) fillMe();
+      };
+      $("#saveProfile").onclick = () => {
+        $("#profileEdit").hidden = true;
+        save();
+        renderMe();
+        toast("Profil enregistré.");
+      };
+
+      $("#fName").oninput = e => { S.me.name = e.target.value; save(); renderMe(); };
+      $("#fHandle").oninput = e => {
+        S.me.handle = e.target.value.replace(/[^a-zA-Z0-9_]/g, "");
+        save();
+        renderMe();
+      };
+      $("#fBio").oninput = e => { S.me.bio = e.target.value; save(); };
+      $("#fFol").oninput = e => {
+        S.me.followers = Math.max(0, parseInt(e.target.value, 10) || 0);
+        save();
+        renderMe();
+      };
+      $("#fColor").oninput = e => updateMe("color", e.target.value);
+      $("#fAcc").oninput = e => updateMe("accent", e.target.value);
+      $("#fTheme").onchange = e => setTheme(e.target.value);
+      $("#fProv").onchange = e => {
+        API.prov = e.target.value;
+        aiFields();
+      };
+      $("#fKey").oninput = e => { API.key = e.target.value.trim(); };
+      $("#fModel").oninput = e => { API.model = e.target.value.trim(); };
+
+      $("#fPhoto").onchange = async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          updateMe("photo", await readPhoto(file));
+          toast("Photo de profil mise à jour.");
+        } catch {
+          toast("Image illisible.");
+        }
+      };
+      $("#fBanner").onchange = async e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          updateMe("banner", await readBanner(file));
+          toast("Bannière mise à jour.");
+        } catch {
+          toast("Image illisible.");
+        }
+      };
+      $("#fNoPhoto").onclick = () => updateMe("photo", "");
+      $("#fNoBanner").onclick = () => updateMe("banner", "");
+
+      $("#cPhoto").onchange = e => handleFileToMemory(e.target, "statusia_new_character_photo");
+      $("#cMake").onclick = createCharacter;
+
+      $("#myChars").onclick = e => {
+        const button = e.target.closest("button[data-a]");
+        if (!button) return;
+        const id = button.dataset.id;
+
+        if (button.dataset.a === "chat") {
+          cur = id;
+          tab("M");
+        } else if (button.dataset.a === "del" && confirm("Supprimer ce personnage et ses publications ?")) {
+          S.chars = S.chars.filter(c => c.id !== id);
+          S.posts = S.posts.filter(p => p.who !== id);
+          S.posts.forEach(p => { p.cm = (p.cm || []).filter(c => c.who !== id); });
+          delete S.dms[id];
+          if (cur === id) cur = "lea";
+          save();
+          renderFeed();
+          myChars();
+          strip();
+          renderMessages();
+        }
+      };
+
+      let phId = "";
+      $("#allChars").onclick = e => {
+        const button = e.target.closest("button[data-a]");
+        if (!button) return;
+        phId = button.dataset.id;
+
+        if (button.dataset.a === "ph") {
+          $("#ph").click();
+        } else if (button.dataset.a === "rp") {
+          delete S.over[phId];
+          const character = S.chars.find(c => c.id === phId);
+          if (character) character.p = "";
+          save();
+          myChars();
+          renderFeed();
+        }
+      };
+      $("#ph").onchange = async e => {
+        const file = e.target.files[0];
+        e.target.value = "";
+        if (!file || !phId) return;
+        try {
+          const photo = await readPhoto(file);
+          const character = S.chars.find(c => c.id === phId);
+          if (character) character.p = photo;
+          else S.over[phId] = photo;
+          save();
+          myChars();
+          renderFeed();
+          toast("Photo du personnage mise à jour.");
+        } catch {
+          toast("Image illisible.");
+        }
+      };
+    }
+
+    const SC = {};
+
+    S.posts = (S.posts || []).map(post => ({
+      ...post,
+      cm: Array.isArray(post.cm) ? post.cm : [],
+      likes: Number(post.likes) || 0,
+      rt: Number(post.rt) || 0
+    }));
+    S.chars = S.chars || [];
+    S.over = S.over || {};
+
+    initEvents();
+    renderTheme();
+    renderMe();
+    renderFeed();
+    tab("F");
+    scheduleNextStream();
+  </script>
 </body>
 </html>
