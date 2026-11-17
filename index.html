@@ -125,6 +125,20 @@ nav button[aria-selected=true]{color:var(--ink);border-color:var(--acc)}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){.post.new,.live i,.chip.flash{animation:none}.meter i{transition:none}}
 select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 12px;font:inherit}
+
+:root{--lnk:#1d9bf0}:root[data-t="rose"],:root[data-t="blanc"],:root[data-t="jaune"]{--lnk:#1a73e8}
+.ln{color:var(--lnk);cursor:pointer}.ln:hover{text-decoration:underline}
+.pbar{position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--line)}.pbar i{display:block;height:100%;width:50%;transition:width .8s,background .8s}
+.pimg{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;border:1px solid var(--line);margin:2px 0 8px;display:block;background:var(--bub)}
+.prev{margin-top:8px;padding-left:10px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:4px;font-size:.88rem;overflow-wrap:anywhere}.prev:empty{display:none}
+.cmt.rp{margin-left:34px;padding-left:10px;border-left:2px solid var(--line)}
+.cmt .acts{max-width:340px}.acts button.del:hover,.acts button.conf{color:var(--bad)}.dl{font-size:.8rem}
+.rto{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 16px;color:var(--lnk);font-size:.85rem}
+.cpv{position:relative;margin-top:8px}.cpv img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;display:block}.cpv .btn{position:absolute;top:8px;right:8px;background:var(--card)}
+.ct{display:flex;gap:12px;align-items:center;width:100%;padding:12px 16px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;color:inherit}.ct:hover{background:var(--bub)}
+.ct .mi{flex:1;min-width:0}.ct .cn{display:flex;gap:6px;align-items:baseline}.cp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat{height:calc(100dvh - 54px - 66px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:300px}
+.m{max-width:78%;line-height:1.35}.msgs{background:color-mix(in srgb,var(--bub) 30%,transparent)}
 </style>
 </head><body>
 <div class="app">
@@ -136,7 +150,7 @@ select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--
     <button class="ib" id="palBtn" aria-label="Apparence"></button>
     <div class="pal" id="pal" hidden></div>
   </div>
-</header>
+<div class="pbar"><i id="pbi"></i></div></header>
 <main>
 <section id="vF">
   <div class="stories" id="stories"></div>
@@ -144,7 +158,7 @@ select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--
     <div id="meAv"></div>
     <div class="cf">
       <textarea id="pt" rows="2" maxlength="280" placeholder="Quoi de neuf ?" aria-label="Nouvelle publication"></textarea>
-      <div class="row end"><span class="hd">Les autres comptes jugent ce que tu écris.</span><button class="btn" id="pb">Publier</button></div>
+      <div id="cpv"></div><div class="row end"><button class="ib" id="pimgb" aria-label="Ajouter une photo"></button><span class="hd" style="flex:1">Les autres comptes jugent ce que tu écris.</span><button class="btn" id="pb">Publier</button></div>
     </div>
   </div>
   <div class="live" id="live"><i></i><span id="liveTxt">En direct</span></div>
@@ -153,9 +167,8 @@ select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--
 <section id="vD" hidden></section>
 <section id="vU" hidden></section>
 <section id="vM" hidden>
-  <div class="strip" id="strip"></div>
-  <div class="bar"><span>Messages illimités, historique conservé</span><button class="btn ghost sm" id="cl">Effacer</button></div>
-  <div class="chat"><div class="chead" id="chead"></div><div class="msgs" id="msgs" aria-live="polite"></div>
+  <div class="inbox" id="inbox"></div>
+  <div class="chat" id="chatw" hidden><div class="chead" id="chead"></div><div class="msgs" id="msgs" aria-live="polite"></div>
     <div class="send"><textarea id="mi" rows="1" placeholder="Écrire un message" aria-label="Message"></textarea><button class="btn" id="mb">Envoyer</button></div>
   </div>
 </section>
@@ -173,12 +186,13 @@ select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--
 <script>
 /* ---------- Outils ---------- */
 const $=s=>document.querySelector(s);
-const esc=s=>String(s==null?'':s).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
 const rand=n=>Math.floor(Math.random()*n),pick=a=>a[rand(a.length)],clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const later=(ms,fn)=>setTimeout(fn,ms);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const fmt=n=>n>=1e6?(n/1e6).toFixed(1).replace('.',',')+' M':n>=1e4?(n/1e3).toFixed(1).replace('.',',')+' k':Math.round(n).toLocaleString('fr-FR');
 const ago=t=>{if(!t)return'';const m=Math.floor((Date.now()-t)/6e4);return m<1?'à l’instant':m<60?m+' min':m<1440?Math.floor(m/60)+' h':Math.floor(m/1440)+' j'};
+const rich=t=>esc(t).replace(/(^|[^\w&#;])(@[A-Za-z0-9_.]*[A-Za-z0-9_]|#[\p{L}\d_]+)/gu,(m,a,b)=>a+`<span class="ln" data-h="${b}">${b}</span>`);
 const shade=(h,f)=>{const n=parseInt(h.slice(1),16);return'#'+[n>>16,(n>>8)&255,n&255].map(x=>Math.round(clamp(x*f,0,255)).toString(16).padStart(2,'0')).join('')};
 const inkOn=bg=>{if(!/^#[0-9a-f]{6}$/i.test(bg))return'var(--ink)';const n=parseInt(bg.slice(1),16);return(.299*(n>>16)+.587*((n>>8)&255)+.114*(n&255))/255>.62?'#111':'#fff'};
 
@@ -188,6 +202,7 @@ const I={re:ic('M4 5h16v11H9l-5 4z'),rt:ic('M4 9l3-3 3 3M7 6v9a3 3 0 003 3h6M20 
 bk:ic('M15 5l-7 7 7 7'),pal:ic('M12 3a9 9 0 100 18c1.6 0 2-1 1.5-2s0-2 1.5-2h2a3 3 0 003-3c0-5-4.5-11-8-11zM7.5 11h.01M10 7.5h.01M14.5 7.5h.01'),
 home:ic('M4 11l8-7 8 7v9h-5v-6H9v6H4z'),mail:ic('M3 6h18v12H3zM3 7l9 7 9-7'),user:ic('M12 12a4 4 0 100-8 4 4 0 000 8zM4 21c0-4 4-6 8-6s8 2 8 6'),
 key:ic('M15 8h.01M21 8a6 6 0 11-11.6 2.1L3 16.5V21h4.5v-2.5H10V16h2.5l.9-.9A6 6 0 0121 8z'),gr:ic('M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z'),us:ic('M9 11a3 3 0 100-6 3 3 0 000 6zM3 20c0-3 3-5 6-5s6 2 6 5M17 11a3 3 0 000-6M21 20c0-2-1.5-4-4-4.6')};
+I.tr=ic('M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6');I.im=ic('M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4M9 9h.01');
 const BADGE=`<svg class='vb' viewBox='0 0 24 24'><path d='M12 2l2.4 2 3.1-.2 1 3 2.6 1.8-1 3 1 3-2.6 1.8-1 3-3.1-.2L12 22l-2.4-2-3.1.2-1-3L2.9 15.4l1-3-1-3 2.6-1.8 1-3 3.1.2z' fill='#1d9bf0'/><path d='M8 12l3 3 5-6' stroke='#fff' stroke-width='2' fill='none'/></svg>`;
 
 /* ---------- Portraits illustrés et bannières ---------- */
@@ -195,26 +210,28 @@ const SK=['#f3d2b8','#e8b998','#d29b72','#a8724c','#7a4c32'],HR=['#1b1511','#3a2
 const BG=[['#cfe3f5','#9bbbd8'],['#f6dcc8','#e4b898'],['#d8e6cf','#a9c6a0'],['#e4d6f0','#bba5d3'],['#f4d0d6','#dea3ae'],['#d7dde4','#a8b3c0'],['#f7e9b8','#e3cd7f']];
 const TS=['#e07a5f','#2d2a4a','#f2b134','#6b4f3a','#ef476f','#1f2937','#a78bfa','#16a34a','#7c6cf0','#2563eb','#f4a6c0','#374151','#0f766e','#b45309'];
 function portrait(o){
-  const skin=SK[o.s||0],hair=HR[o.h||0],sh=o.t||'#3b4a63',g=BG[o.g||0],hs=o.hs||0;
-  let x=`<defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${g[0]}'/><stop offset='1' stop-color='${g[1]}'/></linearGradient></defs><rect width='100' height='100' fill='url(#g)'/>`;
-  if(hs===2||hs===3)x+=`<path d='M27 54Q22 14 50 13Q78 14 73 54L76 88H24Z' fill='${hair}'/>`;
-  x+=`<path d='M8 102Q10 76 36 71L64 71Q90 76 92 102Z' fill='${sh}'/>`;
-  x+=`<path d='M40 71Q50 82 60 71L58 60H42Z' fill='${shade(skin,.88)}'/>`;
-  x+=`<ellipse cx='33.5' cy='45' rx='3' ry='4.5' fill='${shade(skin,.93)}'/><ellipse cx='66.5' cy='45' rx='3' ry='4.5' fill='${shade(skin,.93)}'/>`;
-  x+=`<ellipse cx='50' cy='43' rx='17' ry='20.5' fill='${skin}'/>`;
-  if(o.bd)x+=`<path d='M33.5 47Q34 67 50 67Q66 67 66.5 47Q62 59 50 59Q38 59 33.5 47Z' fill='${hair}' opacity='.92'/>`;
-  if(hs===0)x+=`<path d='M32.5 42Q29 16 50 16Q71 16 67.5 42Q64 28 50 27Q38 27 32.5 42Z' fill='${hair}'/>`;
-  if(hs===1)x+=`<path d='M33 38Q33 20 50 20Q67 20 67 38Q60 27 50 27Q40 27 33 38Z' fill='${hair}'/>`;
-  if(hs===2)x+=`<path d='M31.5 46Q27 14 50 14Q73 14 68.5 46Q66 28 54 26Q42 30 31.5 46Z' fill='${hair}'/>`;
-  if(hs===3)x+=`<path d='M31.5 44Q28 15 50 15Q72 15 68.5 44Q64 28 50 27Q38 28 31.5 44Z' fill='${hair}'/><circle cx='50' cy='11' r='7' fill='${hair}'/>`;
-  x+=`<ellipse cx='43' cy='43' rx='1.9' ry='2.2' fill='#251c18'/><ellipse cx='57' cy='43' rx='1.9' ry='2.2' fill='#251c18'/>`;
-  x+=`<path d='M39 38.5Q43 36.5 46.5 38.5M53.5 38.5Q57 36.5 61 38.5' stroke='${shade(hair,.9)}' stroke-width='1.6' fill='none' stroke-linecap='round'/>`;
-  x+=`<path d='M50 44Q49 49 51 50' stroke='${shade(skin,.8)}' stroke-width='1.2' fill='none' stroke-linecap='round'/>`;
-  x+=o.sm===0?`<path d='M45.5 55.5Q50 57 54.5 55.5' stroke='#7a3b3b' stroke-width='1.5' fill='none' stroke-linecap='round'/>`:`<path d='M44.5 54Q50 59.5 55.5 54' stroke='#7a3b3b' stroke-width='1.6' fill='none' stroke-linecap='round'/>`;
-  if(o.gl)x+=`<g fill='none' stroke='#222' stroke-width='1.3'><circle cx='43' cy='43' r='5.6'/><circle cx='57' cy='43' r='5.6'/><path d='M48.6 43h2.8'/></g>`;
+  const sk=SK[o.s||0],hr=HR[o.h||0],sh=o.t||'#3b4a63',g=BG[o.g||0],hs=o.hs||0,ey=['#4a2f1d','#2f5d8a','#4d6b3a','#6b4a2a'][(o.e!=null?o.e:(o.h||0)+(o.s||0))%4];
+  const dk=shade(sk,.8),hd=shade(hr,.62),hl=shade(hr,1.8),F=`fill='url(#h)'`;
+  let x=`<defs><linearGradient id='b' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${g[0]}'/><stop offset='1' stop-color='${g[1]}'/></linearGradient><radialGradient id='f' cx='.42' cy='.36' r='.8'><stop offset='0' stop-color='${shade(sk,1.1)}'/><stop offset='.6' stop-color='${sk}'/><stop offset='1' stop-color='${dk}'/></radialGradient><linearGradient id='n' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${shade(sk,.6)}'/><stop offset='.6' stop-color='${dk}'/></linearGradient><linearGradient id='h' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${shade(hr,1.3)}'/><stop offset='1' stop-color='${hd}'/></linearGradient><linearGradient id='c' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='${shade(sh,1.18)}'/><stop offset='1' stop-color='${shade(sh,.68)}'/></linearGradient><filter id='bl'><feGaussianBlur stdDeviation='4'/></filter></defs><rect width='100' height='100' fill='url(#b)'/><circle cx='16' cy='22' r='13' fill='#fff' opacity='.3' filter='url(#bl)'/><circle cx='88' cy='70' r='16' fill='#fff' opacity='.2' filter='url(#bl)'/>`;
+  if(hs>=2)x+=`<path d='M26 58Q19 12 50 11Q81 12 74 58L79 94L21 94Z' ${F}/>;
+  if(hs===3)x+=`<circle cx='50' cy='9' r='7.5' ${F}/>`;
+  x+=`<path d='M5 102Q8 78 34 72L66 72Q92 78 95 102Z' fill='url(#c)'/><path d='M41 72L50 89L59 72Z' fill='${dk}'/><path d='M36 72Q50 88 64 72' stroke='${shade(sh,1.35)}' stroke-width='2' fill='none'/>`;
+  x+=`<path d='M42 58V74Q50 80 58 74V58Z' fill='url(#n)'/><ellipse cx='32.5' cy='46' rx='3' ry='5' fill='${dk}'/><ellipse cx='67.5' cy='46' rx='3' ry='5' fill='${dk}'/>`;
+  x+=`<path d='M33 42Q33 24 50 24Q67 24 67 42Q67 54 62 61Q57 67 50 67Q43 67 38 61Q33 54 33 42Z' fill='url(#f)'/><ellipse cx='39.5' cy='53' rx='5' ry='3' fill='#e8788a' opacity='.16'/><ellipse cx='60.5' cy='53' rx='5' ry='3' fill='#e8788a' opacity='.16'/>`;
+  if(o.bd)x+=`<path d='M33.5 46Q34 69 50 70Q66 69 66.5 46Q64 58 58 60Q50 57 42 60Q36 58 33.5 46Z' ${F} opacity='.93'/>`;
+  const eye=c=>`<ellipse cx='${c}' cy='43' rx='3.6' ry='2.3' fill='#f6f1ee'/><circle cx='${c}' cy='43' r='1.9' fill='${ey}'/><circle cx='${c}' cy='43' r='.9' fill='#120c0a'/><circle cx='${c+.7}' cy='42.3' r='.5' fill='#fff'/><path d='M${c-3.8} 43Q${c} 39.8 ${c+3.8} 43' stroke='${shade(hr,.5)}' stroke-width='.9' fill='none'/><path d='M${c-3} 45Q${c} 46.4 ${c+3} 45' stroke='${dk}' stroke-width='.5' fill='none' opacity='.6'/>`;
+  x+=eye(43)+eye(57)+`<path d='M38.5 38.3Q43 35.6 47.5 37.8M52.5 37.8Q57 35.6 61.5 38.3' stroke='${hd}' stroke-width='1.8' fill='none' stroke-linecap='round'/>`;
+  x+=`<path d='M50 43Q48.6 50 47.4 51.6Q50 53.2 52.6 51.6Q51.4 50 50 43' stroke='${shade(sk,.62)}' stroke-width='.9' fill='none' opacity='.55'/>`;
+  x+=o.sm===0?`<path d='M44.5 58Q50 58.8 55.5 58' stroke='#8a4448' stroke-width='1.5' fill='none' stroke-linecap='round'/>`:`<path d='M44.3 57Q47.5 55.6 50 56.6Q52.5 55.6 55.7 57Q50 60 44.3 57Z' fill='#a9504f'/><path d='M44.3 57Q50 63.5 55.7 57Q50 59.3 44.3 57Z' fill='#c46a68'/>`;
+  x+=`<path d='M41 64Q50 70 59 64' stroke='${dk}' stroke-width='.8' fill='none' opacity='.3'/>`;
+  if(hs===0)x+=`<path d='M32 43Q27 13 50 13Q73 13 68 43Q65 29 50 27Q37 29 32 43Z' ${F}/><path d='M38 18Q50 12 62 18' stroke='${hl}' stroke-width='1.2' fill='none' opacity='.35'/>`;
+  if(hs===1)x+=`<path d='M33 40Q31 17 50 17Q69 17 67 40Q62 27 52 26Q42 28 33 40Z' ${F}/>`;
+  if(hs===2)x+=`<path d='M31 48Q25 12 50 12Q75 12 69 48Q67 28 52 25Q40 30 31 48Z' ${F}/><path d='M33 46Q30 70 27 92L36 92Q35 66 36 54Z' ${F}/><path d='M67 46Q70 70 73 92L64 92Q65 66 64 54Z' ${F}/><path d='M40 17Q52 13 62 20' stroke='${hl}' stroke-width='1.2' fill='none' opacity='.3'/>`;
+  if(hs===3)x+=`<path d='M31.5 44Q28 15 50 15Q72 15 68.5 44Q64 28 50 27Q38 28 31.5 44Z' ${F}/><path d='M40 19Q50 15 60 19' stroke='${hl}' stroke-width='1.2' fill='none' opacity='.35'/>`;
+  if(o.gl)x+=`<g fill='rgba(255,255,255,.12)' stroke='#2a2a2a' stroke-width='1.1'><rect x='36' y='39.5' width='11' height='8.5' rx='3.5'/><rect x='53' y='39.5' width='11' height='8.5' rx='3.5'/><path d='M47 43.5h6'/></g>`;
   return'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>${x}</svg>`);
 }
-const randomAv=()=>({s:rand(5),h:rand(6),hs:rand(4),t:pick(TS),g:rand(7),bd:rand(3)===0?1:0,gl:rand(4)===0?1:0,sm:rand(2)});
+const randomAv=()=>({s:rand(5),h:rand(6),hs:rand(4),t:pick(TS),g:rand(7),bd:rand(3)===0?1:0,gl:rand(4)===0?1:0,sm:rand(2),e:rand(4)});
 const bn=(a,b,x)=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 130' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${a}'/><stop offset='1' stop-color='${b}'/></linearGradient></defs><rect width='400' height='130' fill='url(#g)'/>${x}</svg>`);
 const BN={
 travel:bn('#f59e6b','#fbd9a0',`<circle cx='300' cy='46' r='20' fill='#fff3cf'/><path d='M0 130V84l60-40 50 40 40-26 70 48 50-30 130 54z' fill='#3a5a6e'/><path d='M0 130V102l80-26 70 32 90-30 160 52z' fill='#1f3342'/>`),
@@ -245,6 +262,24 @@ const CH=[
 {id:'ines',n:'Inès Moreau',h:'ines.mrw',v:1,f:128000,g:945,s:{s:2,h:1,hs:2,t:'#f4a6c0',g:4},bn:'life',pb:'Lifestyle · routines · bonnes ondes\nCollabs en DM',b:'influenceuse lifestyle, positive à outrance, parle collabs, routines et #ad, mais très susceptible quand on la critique'},
 {id:'paul',n:'Paul Girard',h:'paul.g.photo',f:9800,g:564,s:{s:1,h:3,hs:1,t:'#374151',g:5,bd:1},bn:'photo',pb:'Photographe de rue\nPellicule, villes la nuit',b:'photographe de rue, calme, parle lumière, pellicule, villes la nuit, répond posément'}];
 
+const PE={
+lea:"Chaleureuse mais stressée en voyage. Messages moyens, 1-2 emojis (✈️🚆), anecdotes de galère, partage des bons plans. Soutient les gens gentils.",
+max:"Troll sarcastique. Très court (3-8 mots), minuscules, ironie, 'skill issue', accuse le lag. Taquine, devient piquant si on l'agace.",
+ami:"Maternelle et bienveillante, appelle tout le monde « mon cœur », conseils pratiques, emojis 🍲❤️, ne critique jamais méchamment.",
+hen:"Pédant pince-sans-rire, phrases soignées et ponctuées, corrige les erreurs de fait ou de langue, références historiques, jamais d'emoji.",
+jad:"Énergique, phrases à l'impératif, MAJUSCULES, 💪🔥, motive tout le monde, intolérante aux plaintes et à la paresse, bienveillante au fond.",
+theo:"Humour pince-sans-rire de geek, jargon (prod, deploy, bug), blasé, un emoji maximum.",
+nou:"Douce et rêveuse, tout en minuscules, phrases poétiques avec ellipses, très sensible: les mots durs la blessent et elle le dit.",
+gus:"Mauvaise foi totale, exagère, MAJUSCULES et « !!! », tout est la faute de l'arbitre, provocateur mais drôle.",
+cam:"Anxieuse et drôle, autodérision, partiels et manque de sommeil, 😭💀, « je meurs », très gentille avec les gentils.",
+kev:"Humour de papa lourd, jeux de mots, barbecue et bricolage, « mdr » et 👍, bon cœur, dépassé par la technologie.",
+ines:"Positivité excessive, « trop hâte », ✨🥰, vocabulaire marketing (collab, #ad), très susceptible: une critique reçoit une réponse passive-agressive.",
+paul:"Calme et contemplatif, phrases courtes, parle de lumière et de pellicule, presque jamais d'emoji, observateur, bienveillant mais distant."};
+const persona=c=>c.b+(PE[c.id]?' || Style: '+PE[c.id]:'');
+const NEG=[' nul',' con ','idiot','stupid','bête',' merde','déteste','hais ','moche','ridicule','débile','pourri','naze','ferme ta','connard','dégage','crève','ntm',' tg '],POS=['merci','bravo','super','génial','adore','content','belle ','bien joué','félicit','bonne journée','❤','😊','🥰',' top','courage','respect','inspir'];
+const localTone=t=>{t=' '+String(t).toLowerCase()+' ';const n=NEG.filter(w=>t.includes(w)).length,p=POS.filter(w=>t.includes(w)).length;return n>p?(n>1?-2:-1):p>n?(p>1?2:1):0};
+const cid=()=>'k'+uid(),kviews=k=>((k.likes||0)+1)*17+((k.t||0)%53)+(k.re?0:30);
+let tagF=null,pimg='';
 /* ---------- État ---------- */
 let S={posts:[],dms:{}};
 try{const r=(localStorage.getItem('tweety')||localStorage.getItem('statusia'));if(r)S=JSON.parse(r)}catch(e){}
@@ -253,6 +288,7 @@ S.me=Object.assign({name:'Toi',handle:'moi',bio:'',photo:'',banner:'',color:'#6b
 S.chars=(S.chars||[]).map(c=>Object.assign({},c,{h:String(c.h||'perso').replace(/^@/,''),s:c.s||randomAv(),bn:c.bn||pick(Object.keys(BN))}));
 S.over=S.over||{};S.ob=S.ob||{};
 S.pop=typeof S.pop==='number'?S.pop:50;S.log=S.log||[];
+S.posts.forEach(p=>(p.cm||(p.cm=[])).forEach(k=>{k.id=k.id||'k'+uid();k.likes=k.likes||0}));
 S.fl=S.fl||{lea:1,ami:1,hen:1,jad:1,theo:1,paul:1};
 const AV={};
 const all=()=>CH.concat(S.chars),byId=id=>all().find(c=>c.id===id);
@@ -302,13 +338,13 @@ async function ai(prompt,quiet){
     if(c==='bad_key'){aiOff=true;live('Clé API refusée, vérifie-la',1)}
     if(!quiet||c==='bad_key')toast(errMsg(e));return null}
 }
-const roster=()=>all().map(c=>`${c.id}: ${c.n} (@${c.h}), ${c.b}`).join('\n');
+const roster=()=>all().map(c=>`${c.id}: ${c.n} (@${c.h}), ${persona(c)}`).join('\n');
 const nameOf=w=>w==='me'?'Utilisateur':(byId(w)?byId(w).n:'?');
-function feedCtx(){return S.posts.slice(0,8).map(p=>{const cm=p.cm.slice(-3).map(k=>nameOf(k.who)+': '+k.text).join(' | ');
+function feedCtx(){return S.posts.slice(0,8).map(p=>{const cm=p.cm.slice(-3).map(k=>'('+k.id+') '+nameOf(k.who)+': '+k.text).join(' | ');
   return`[${p.id}] ${p.who==='me'?'Utilisateur ('+S.me.name+', @'+S.me.handle+')':nameOf(p.who)}: ${p.text}${cm?' || commentaires: '+cm:''}`}).join('\n')}
 function repCtx(){const mine=S.posts.filter(p=>p.who==='me').slice(0,3).map(p=>`"${p.text.slice(0,100)}"`).join(' ; ');
   return`Utilisateur du réseau: ${S.me.name} (@${S.me.handle}). Sa réputation actuelle: ${S.pop}/100 (${popInfo(S.pop).l}).`+(mine?` Ses dernières publications: ${mine}.`:'')}
-const STYLE='ton réaliste d’un vrai réseau social français: spontané, familier, abréviations, ironie, opinions tranchées, parfois un emoji ou un hashtag, jamais un ton d’assistant, chacun dans sa personnalité.';
+const STYLE='ton réaliste d’un vrai réseau social français: spontané, familier, abréviations, ironie, opinions tranchées, parfois un emoji ou un hashtag, jamais un ton d’assistant. Respecte strictement le champ Style de chaque personnage: longueur, ponctuation, emojis et attitude doivent être très différents d’un personnage à l’autre.';
 
 /* ---------- Monde vivant ---------- */
 const Q={posts:[],cm:[]};let filling=false,lastFill=0;
@@ -317,37 +353,40 @@ async function fill(force){
   if(Date.now()<coolUntil||Date.now()-lastFill<20000)return;
   filling=true;lastFill=Date.now();
   const now=new Date().toLocaleString('fr-FR',{weekday:'long',hour:'2-digit',minute:'2-digit'});
-  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\nMoment: ${now}.\n${repCtx()}\n\nFil récent (identifiant entre crochets):\n${feedCtx()||(vide)}\n\nGénère l’activité du réseau, avec un ${STYLE}\n- "posts": 4 nouvelles publications courtes (max 220 caractères) de personnages différents. Elles peuvent parler de leur vie, de l’actualité du réseau, de publications du fil, ou de l’utilisateur selon sa réputation (mal vu: on le critique ou on s’en moque; apprécié: on le salue).\n- "comments": 5 commentaires courts sur des publications du fil (champ "post" = identifiant exact entre crochets), de personnages différents. Ils peuvent se répondre entre eux ou répondre à l’utilisateur.\nRéponds uniquement par un JSON: {"posts":[{"who":"id","text":"..."}],"comments":[{"post":"id","who":"id","text":"..."}]}`,true);
+  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\nMoment: ${now}.\n${repCtx()}\n\nFil récent (identifiant entre crochets):\n${feedCtx()||'(vide)'}\n\nGénère l’activité du réseau, avec un ${STYLE}\n- "posts": 4 nouvelles publications courtes (max 220 caractères) de personnages différents. Elles peuvent parler de leur vie, de l’actualité du réseau, de publications du fil, ou de l’utilisateur selon sa réputation (mal vu: on le critique ou on s’en moque; apprécié: on le salue). Ajoute un champ "img" (une clé parmi ${Object.keys(BN).join(', ')}) à environ 1 publication sur 3, quand une photo irait avec le texte.\n- "comments": 5 commentaires courts sur des publications du fil (champ "post" = identifiant exact entre crochets), de personnages différents. Ils peuvent se répondre entre eux (champ "re" = identifiant entre parenthèses du commentaire auquel ils répondent) ou répondre à l’utilisateur.\nRéponds uniquement par un JSON: {"posts":[{"who":"id","text":"...","img":"clé ou omis"}],"comments":[{"post":"id","who":"id","text":"...","re":"id ou omis"}]}`,true);
   filling=false;
   if(r&&typeof r==='object'){
-    (r.posts||[]).forEach(x=>{if(x&&byId(x.who)&&x.text)Q.posts.push({who:x.who,text:String(x.text).slice(0,260)})});
-    (r.comments||[]).forEach(x=>{if(x&&x.post&&byId(x.who)&&x.text)Q.cm.push({post:x.post,who:x.who,text:String(x.text).slice(0,200)})});
+    (r.posts||[]).forEach(x=>{if(x&&byId(x.who)&&x.text)Q.posts.push({who:x.who,text:String(x.text).slice(0,260),img:x.img})});
+    (r.comments||[]).forEach(x=>{if(x&&x.post&&byId(x.who)&&x.text)Q.cm.push({post:x.post,who:x.who,text:String(x.text).slice(0,200),re:x.re})});
     live('En direct');
     if(S.posts.length<4)for(let i=0;i<3;i++)later(i*900,dripPost);
   }
 }
 function insertPost(p){
-  if(view!=='F')return;const f=$('#feed'),em=f.querySelector('.empty');if(em)em.remove();
+  if(view!=='F')return;if(tagF){tagF=null;renderFeed();return}const f=$('#feed'),em=f.querySelector('.empty');if(em)em.remove();
   const before=document.documentElement.scrollHeight;
-  f.insertAdjacentHTML('afterend',postHTML(p,'new'));
+  f.insertAdjacentHTML('afterbegin',postHTML(p,'new'));
   if(scrollY>160)scrollBy(0,document.documentElement.scrollHeight-before);
 }
-function addPost(who,text){
+function addPost(who,text,img){
   const c=byId(who);if(!c)return;
-  const p={id:uid(),who,text,t:Date.now(),likes:rand(20)+(c.f>20000?rand(120):0),liked:false,cm:[],rt:rand(4)};
+  const p={id:uid(),who,text,t:Date.now(),likes:rand(20)+(c.f>20000?rand(120):0),liked:false,cm:[],rt:rand(4)};const ik=BN[img]?img:(rand(10)<2?c.bn:'');if(ik){p.ik=ik;p.hue=rand(70)-35;p.pos=rand(100)}
   S.posts.unshift(p);if(S.posts.length>120)S.posts.length=120;save();insertPost(p);
 }
-function addCm(p,who,text){
-  const c=byId(who);if(!c)return;
-  p.cm.push({who,text,t:Date.now()});p.likes+=rand(3);save();touch(p);
+const rootOf=(p,id)=>{const k=p.cm.find(z=>z.id===id);return k?(k.re&&p.cm.some(z=>z.id===k.re)?k.re:k.id):null};
+function addCm(p,who,text,re){const c=byId(who);if(!c)return;
+  const rid=re&&rootOf(p,re),par=rid&&p.cm.find(z=>z.id===re);
+  if(par&&!/^@/.test(text)){const a=authorOf(par.who);if(a)text='@'+a.h+' '+text}
+  const k={id:cid(),who,text,t:Date.now(),likes:rand(3)};if(rid)k.re=rid;
+  p.cm.push(k);p.likes+=rand(3);save();touch(p);
   if(view==='D'&&curPost===p.id)renderCm(p);
-  if(p.who==='me')toast(c.n+' a commenté ta publication');
+  if(p.who==='me'||(par&&par.who==='me'))toast(c.n+(par&&par.who==='me'?' t’a répondu':' a commenté ta publication'));
 }
-function dripPost(){const x=Q.posts.shift();if(x)addPost(x.who,x.text);if(Q.posts.length<2)fill()}
-function dripCm(){let n=Q.cm.length;while(n--){const x=Q.cm.shift(),p=S.posts.find(q=>q.id===x.post);if(p&&byId(x.who)){addCm(p,x.who,x.text);break}}if(Q.cm.length<3)fill()}
+function dripPost(){const x=Q.posts.shift();if(x)addPost(x.who,x.text,x.img);if(Q.posts.length<2)fill()}
+function dripCm(){let n=Q.cm.length;while(n--){const x=Q.cm.shift(),p=S.posts.find(q=>q.id===x.post);if(p&&byId(x.who)){addCm(p,x.who,x.text,x.re);break}}if(Q.cm.length<3)fill()}
 function ambientLike(){
   if(!S.posts.length)return;const p=S.posts[Math.min(rand(S.posts.length),rand(S.posts.length))];
-  if(p.tone<0&&rand(3))return;p.likes+=1+rand(3);if(rand(4)===0)p.rt=(p.rt||0)+1;save();touch(p)}
+  if(p.tone<0&&rand(3))return;p.likes+=1+rand(3);if(rand(4)===0)p.rt=(p.rt||0)+1;if(p.cm.length&&rand(3)===0){pick(p.cm).likes=(pick(p.cm).likes||0)+1;if(view==='D'&&curPost===p.id)renderCm(p)}save();touch(p)}
 function startWorld(){
   const lp=(fn,min,span)=>{const g=()=>later(min+Math.random()*span,()=>{if(!document.hidden)fn();g()});g()};
   lp(dripPost,4000,11000);lp(dripCm,3000,7000);lp(ambientLike,1800,3200);
@@ -357,68 +396,84 @@ function startWorld(){
 
 /* ---------- Popularité ---------- */
 function renderPop(){
-  const i=popInfo(S.pop),c=$('#popChip');c.style.setProperty('--c',i.c);$('#popTxt').textContent=S.pop;
+  const i=popInfo(S.pop),c=$('#popChip');c.style.setProperty('--c',i.c);$('#popTxt').textContent=S.pop;const bb=$('#pbi');bb.style.width=S.pop+'%';bb.style.background=i.c;
   c.setAttribute('aria-label','Popularité '+S.pop+' sur 100, '+i.l);
   if(view==='U'&&curProf==='me')renderProfile();
 }
 function popChange(tone,why,snip){
-  if(!tone)return;
-  const d=[-14,-6,0,5,11][tone+2]+(rand(3)-1),old=S.pop;S.pop=clamp(S.pop+d,0,100);const real=S.pop-old;
+  tone=+tone||0;
+  const d=[-14,-6,rand(3)-1,5,11][tone+2]+(tone?rand(3)-1:0),old=S.pop;S.pop=clamp(S.pop+d,0,100);const real=S.pop-old;
   S.me.followers=Math.max(0,S.me.followers+Math.round(d*(1+S.me.followers*.004)));
   S.log.unshift({t:Date.now(),d:real,why:String(why||'').slice(0,60),sn:String(snip||'').slice(0,50)});S.log=S.log.slice(0,10);
   save();renderPop();
   const c=$('#popChip');c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');
-  toast('Popularité '+(real>0?'+':real<0?'−':'')+Math.abs(real)+(why?' · '+why:''));
+  if(real)toast('Popularité '+(real>0?'+':real<0?'−':'')+Math.abs(real)+(why?' · '+why:''));
 }
 function bumpLikes(p,total){const n=3+rand(3);for(let i=1;i<=n;i++)later(i*(1500+rand(2500)),()=>{p.likes+=Math.max(0,Math.round(total/n));save();touch(p)})}
-async function reactUser(kind,text,p){
-  const thread=p.cm.slice(-6).map(k=>nameOf(k.who)+': '+k.text).join('\n');
-  const what=kind==='post'?`L’utilisateur vient de publier: "${text}"`:`Sous la publication de ${p.who==='me'?'l’utilisateur':nameOf(p.who)} ("${p.text.slice(0,140)}"), l’utilisateur vient de commenter: "${text}"`;
-  const r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\n${repCtx()}\n\n${what}\nCommentaires déjà présents:\n${thread||(aucun)}\n\nFais réagir le réseau avec un ${STYLE}\n1) "tone": entier de -2 à 2 pour ce que dit l’utilisateur (-2 insultant, haineux ou très méchant; -1 désagréable, arrogant, méprisant; 0 banal ou neutre; 1 sympa, positif; 2 très gentil, généreux, inspirant). "reason": 3 à 6 mots expliquant le ton.\n2) "comments": 3 à 5 commentaires courts de personnages différents sur la publication ${kind==='post'?'':'(réponses au commentaire ou à ce qui se dit)'}. Si tone<0: ils se plaignent, critiquent ou se moquent selon leur personnalité. Si tone>0: ils félicitent, soutiennent, remercient. Si tone=0: réactions variées.\n3) "posts": ${kind==='post'?'1 à 3':'0 à 1'} publications personnelles de personnages qui parlent de ce que l’utilisateur vient de dire (se plaindre sur leur propre compte si tone<0, le saluer si tone>0, vide si tone=0), pouvant citer @${S.me.handle}.\nRéponds uniquement par un JSON: {"tone":0,"reason":"...","comments":[{"who":"id","text":"..."}],"posts":[{"who":"id","text":"..."}]}`);
-  if(!r||typeof r!=='object')return;
-  const tone=clamp(Math.round(+r.tone||0),-2,2);
+async function reactUser(kind,text,p,o){o=o||{};
+  const thread=p.cm.slice(-6).map(k=>'('+k.id+') '+nameOf(k.who)+': '+k.text).join('\n');
+  const what=kind==='post'?`L’utilisateur vient de publier: "${text}"${p.img?' (avec une photo jointe)':''}`:`Sous la publication de ${p.who==='me'?'l’utilisateur':nameOf(p.who)} ("${p.text.slice(0,140)}"), l’utilisateur vient de commenter: "${text}"`;
+  const rep=o.to&&o.to!=='me'&&byId(o.to)?`\nL’utilisateur répond directement à ${nameOf(o.to)}: ce personnage doit répondre en premier.`:'';
+  let r=await ai(`Réseau social fictif français. Personnages:\n${roster()}\n\n${repCtx()}\n\n${what}${rep}\nCommentaires déjà présents:\n${thread||'(aucun)'}\n\nFais réagir le réseau avec un ${STYLE}\n1) "tone": entier de -2 à 2 pour ce que dit l’utilisateur (-2 insultant, haineux ou très méchant; -1 désagréable, arrogant, méprisant; 0 banal ou neutre; 1 sympa, positif; 2 très gentil, généreux, inspirant). "reason": 3 à 6 mots expliquant le ton.\n2) "comments": 3 à 5 commentaires courts de personnages différents sur la publication ${kind==='post'?'':'(réponses au commentaire ou à ce qui se dit)'}. Si tone<0: ils se plaignent, critiquent ou se moquent selon leur personnalité. Si tone>0: ils félicitent, soutiennent, remercient. Si tone=0: réactions variées.\n3) "posts": ${kind==='post'?'1 à 3':'0 à 1'} publications personnelles de personnages qui parlent de ce que l’utilisateur vient de dire (se plaindre sur leur propre compte si tone<0, le saluer si tone>0, vide si tone=0), pouvant citer @${S.me.handle}.\nRéponds uniquement par un JSON: {"tone":0,"reason":"...","comments":[{"who":"id","text":"...","re":"u si ça répond à l’utilisateur, ou id d’un commentaire, sinon omis"}],"posts":[{"who":"id","text":"...","img":"clé ou omis"}]}`);
+  if(!r||typeof r!=='object')r={};
+  let tone=clamp(Math.round(+r.tone||0),-2,2);if(!tone)tone=localTone(text);
   if(kind==='post')p.tone=tone;
-  later(1800,()=>popChange(tone,r.reason,text));
+  later(1800,()=>popChange(tone,r.reason||(tone?'Réaction du réseau':''),text));
   const lk=tone>=1?8+rand(25):tone===0?2+rand(10):tone===-1?rand(4):rand(2);if(kind==='post')bumpLikes(p,Math.round(lk*(.5+S.pop/100)));
-  let t=1500;(r.comments||[]).forEach(k=>{if(k&&byId(k.who)&&k.text){t+=1800+rand(3500);const x=k;later(t,()=>addCm(p,x.who,String(x.text).slice(0,200)))}});
-  let u=6000;(r.posts||[]).forEach(k=>{if(k&&byId(k.who)&&k.text){u+=4000+rand(6000);const x=k;later(u,()=>addPost(x.who,String(x.text).slice(0,260)))}});
+  let t=1500;(r.comments||[]).forEach(k=>{if(k&&byId(k.who)&&k.text){t+=1800+rand(3500);const x=k;later(t,()=>addCm(p,x.who,String(x.text).slice(0,200),x.re==='u'?(o.k&&o.k.id):x.re))}});
+  let u=6000;(r.posts||[]).forEach(k=>{if(k&&byId(k.who)&&k.text){u+=4000+rand(6000);const x=k;later(u,()=>addPost(x.who,String(x.text).slice(0,260),x.img))}});
 }
 
 /* ---------- Fil ---------- */
-const actsHTML=p=>`<div class="acts"><button data-pa="cm" aria-label="Commenter">${I.re}<span class="k-cm">${p.cm.length}</span></button><button data-pa="rt" class="${p.rted?'rt':''}" aria-label="Republier">${I.rt}<span class="k-rt">${p.rt||0}</span></button><button data-pa="like" class="${p.liked?'on':''}" aria-label="J’aime">${I.h}<span class="k-lk">${p.likes}</span></button><span class="vw">${I.v}<span class="k-vw">${fmt(views(p))}</span></span></div>`;
+const actsHTML=p=>`<div class="acts"><button data-pa="cm" aria-label="Commenter">${I.re}<span class="k-cm">${p.cm.length}</span></button><button data-pa="rt" class="${p.rted?'rt':''}" aria-label="Republier">${I.rt}<span class="k-rt">${p.rt||0}</span></button><button data-pa="like" class="${p.liked?'on':''}" aria-label="J’aime">${I.h}<span class="k-lk">${p.likes}</span></button><span class="vw">${I.v}<span class="k-vw">${fmt(views(p))}</span></span><button data-pa="del" class="del" aria-label="Supprimer">${I.tr}<span class="dl"></span></button></div>`;
+const postImg=p=>{const u=p.img||(p.ik&&BN[p.ik]);return u?`<img class="pimg" loading="lazy" alt="" src="${esc(u)}"${p.img?'':` style="filter:hue-rotate(${p.hue||0}deg);object-position:${p.pos||50}% 50%"`}>`:''};
+function prevHTML(p){return p.cm.slice(-2).map(k=>{const a=authorOf(k.who);return a?`<div><span class="who" data-prof="${esc(a.id)}">${esc(a.n)}</span> ${rich(k.text)}</div>`:''}).join('')+(p.cm.length>2?`<div class="hd">Voir les ${p.cm.length} commentaires</div>`:'')}
 function postHTML(p,cls){const c=authorOf(p.who);if(!c)return'';
-  return`<article class="post ${cls||''}" data-id="${p.id}">${avh(c,'')}<div class="body"><div><span class="who" data-prof="${esc(c.id)}">${esc(c.n)}</span>${c.v?BADGE:''} <span class="hd">@${esc(c.h)} · <span class="ago" data-t="${p.t}">${ago(p.t)}</span></span></div><div class="txt">${esc(p.text)}</div>${actsHTML(p)}</div></article>`}
-function renderFeed(){const html=S.posts.map(p=>postHTML(p)).join('');$('#feed').innerHTML=html||'<div class="empty">Le fil se remplit dans quelques secondes.</div>'}
+  return`<article class="post ${cls||''}" data-id="${p.id}">${avh(c,'')}<div class="body"><div><span class="who" data-prof="${esc(c.id)}">${esc(c.n)}</span>${c.v?BADGE:''} <span class="hd">@${esc(c.h)} · <span class="ago" data-t="${p.t}">${ago(p.t)}</span></span></div><div class="txt">${rich(p.text)}</div>${postImg(p)}${actsHTML(p)}<div class="prev">${prevHTML(p)}</div></div></article>`}
+function renderFeed(){const L=tagF?S.posts.filter(p=>p.text.toLowerCase().includes(tagF.toLowerCase())):S.posts;
+  const html=(tagF?`<div class="live"><span style="flex:1">Filtre : <span class="ln">${esc(tagF)}</span></span><button class="btn ghost sm" data-x="untag">Effacer</button></div>`:'')+L.map(p=>postHTML(p)).join('');
+  $('#feed').innerHTML=html||'<div class="empty">Le fil se remplit dans quelques secondes.</div>'}
 function touch(p){document.querySelectorAll(`[data-id="${p.id}"]`).forEach(el=>{
   const s=(k,v)=>{const n=el.querySelector('.k-'+k);if(n)n.textContent=v};
   s('cm',p.cm.length);s('rt',p.rt||0);s('lk',p.likes);s('vw',fmt(views(p)));
+  const pv=el.querySelector('.prev');if(pv)pv.innerHTML=prevHTML(p);
   const l=el.querySelector('[data-pa=like]');if(l)l.classList.toggle('on',!!p.liked);
   const r=el.querySelector('[data-pa=rt]');if(r)r.classList.toggle('rt',!!p.rted)})}
 function renderStories(){$('#stories').innerHTML=all().map(c=>`<button class="st" data-prof="${esc(c.id)}"><span class="ring">${avh(c,'l',1)}</span><span>${esc(c.n.split(' ')[0])}</span></button>`).join('')}
 let ub=false;
+function prevImg(){$('#cpv').innerHTML=pimg?`<div class="cpv"><img src="${pimg}" alt=""><button class="btn ghost sm" data-x="rpimg">Retirer</button></div>`:''}
 async function publish(){
-  const t=$('#pt').value.trim();if(!t||ub)return;ub=true;$('#pb').disabled=true;
-  const p={id:uid(),who:'me',text:t,t:Date.now(),likes:0,liked:false,cm:[],rt:0};
-  S.posts.unshift(p);$('#pt').value='';save();insertPost(p);
-  await reactUser('post',t,p);ub=false;$('#pb').disabled=false;
+  const t=$('#pt').value.trim();if((!t&&!pimg)||ub)return;ub=true;$('#pb').disabled=true;
+  const p={id:uid(),who:'me',text:t,t:Date.now(),likes:0,liked:false,cm:[],rt:0};if(pimg)p.img=pimg;
+  S.posts.unshift(p);$('#pt').value='';pimg='';prevImg();save();insertPost(p);
+  await reactUser('post',t||'(photo)',p);ub=false;$('#pb').disabled=false;
 }
-
 /* ---------- Détail d’une publication ---------- */
-let focusCm=false;
+let focusCm=false,rt=null;
 function renderDetail(){
-  const p=S.posts.find(x=>x.id===curPost),c=p&&authorOf(p.who);if(!c){show('F');return}
-  $('#vD').innerHTML=`<div class="dpost" data-id="${p.id}"><div class="dh">${avh(c,'')}<div><div><span class="who" data-prof="${esc(c.id)}">${esc(c.n)}</span>${c.v?BADGE:''}</div><div class="hd">@${esc(c.h)}</div></div></div><div class="dtxt">${esc(p.text)}</div><div class="hd" style="margin-bottom:10px">${esc(new Date(p.t).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'}))}</div>${actsHTML(p)}</div><div id="cmList"></div><div class="cmf">${avh(meObj(),'s',1)}<input type="text" id="cmIn" maxlength="240" placeholder="Ajouter un commentaire" aria-label="Commentaire"><button class="btn" id="cmSend">Publier</button></div>`;
+  const p=S.posts.find(x=>x.id===curPost),c=p&&authorOf(p.who);if(!c){show('F');return}rt=null;
+  $('#vD').innerHTML=`<div class="dpost" data-id="${p.id}"><div class="dh">${avh(c,'')}<div><div><span class="who" data-prof="${esc(c.id)}">${esc(c.n)}</span>${c.v?BADGE:''}</div><div class="hd">@${esc(c.h)}</div></div></div><div class="dtxt">${rich(p.text)}</div>${postImg(p)}<div class="hd" style="margin-bottom:10px">${esc(new Date(p.t).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'}))}</div>${actsHTML(p)}</div><div id="cmList"></div><div id="rto" class="rto" hidden></div><div class="cmf">${avh(meObj(),'s',1)}<input type="text" id="cmIn" maxlength="240" placeholder="Ajouter un commentaire" aria-label="Commentaire"><button class="btn" id="cmSend">Publier</button></div>`;
   renderCm(p);if(focusCm){$('#cmIn').focus();focusCm=false}
 }
+const kacts=k=>`<div class="acts"><button data-ka="re" aria-label="Répondre">${I.re}<span>Répondre</span></button><button data-ka="like" class="${k.liked?'on':''}" aria-label="J’aime">${I.h}<span>${k.likes||0}</span></button><span class="vw">${I.v}<span>${fmt(kviews(k))}</span></span><button data-ka="del" class="del" aria-label="Supprimer">${I.tr}<span class="dl"></span></button></div>`;
+function ckHTML(p,k,rp){const a=authorOf(k.who);if(!a)return'';
+  return`<div class="cmt ${rp?'rp':''}" data-pid="${p.id}" data-k="${k.id}">${avh(a,'s')}<div class="body"><div><span class="who" data-prof="${esc(a.id)}">${esc(a.n)}</span>${a.v?BADGE:''} <span class="hd">@${esc(a.h)}${k.t?' · '+ago(k.t):''}</span></div><div class="txt" style="margin-bottom:6px">${rich(k.text)}</div>${kacts(k)}</div></div>`}
 function renderCm(p){const l=$('#cmList');if(!l)return;
-  l.innerHTML=p.cm.length?p.cm.map(k=>{const a=authorOf(k.who);if(!a)return'';
-    return`<div class="cmt">${avh(a,'s')}<div class="body"><div><span class="who" data-prof="${esc(a.id)}">${esc(a.n)}</span>${a.v?BADGE:''} <span class="hd">@${esc(a.h)}${k.t?' · '+ago(k.t):''}</span></div><div class="txt" style="margin-bottom:0">${esc(k.text)}</div></div></div>`}).join(''):'<div class="empty">Aucun commentaire pour l’instant.</div>'}
+  const top=p.cm.filter(k=>!k.re||!p.cm.some(z=>z.id===k.re));
+  l.innerHTML=top.length?top.map(k=>ckHTML(p,k)+p.cm.filter(z=>z.re===k.id).map(z=>ckHTML(p,z,1)).join('')).join(''):'<div class="empty">Aucun commentaire pour l’instant.</div>'}
+function setReply(p,k){const a=authorOf(k.who);if(!a)return;rt={id:rootOf(p,k.id),to:k.who};const i=$('#cmIn');i.value='@'+a.h+' ';i.focus();const r=$('#rto');r.hidden=false;r.innerHTML=`<span>Réponse à <b>@${esc(a.h)}</b></span><button class="btn ghost sm" data-x="norep">Annuler</button>`}
+function conf2(b,fn){if(!b.classList.contains('conf')){b.classList.add('conf');const d=b.querySelector('.dl');if(d)d.textContent='Confirmer ?';later(3000,()=>{b.classList.remove('conf');if(d)d.textContent=''});return}fn()}
+function kAct(b){const el=b.closest('[data-k]'),p=S.posts.find(x=>x.id===el.dataset.pid),k=p&&p.cm.find(z=>z.id===el.dataset.k);if(!k)return;const a=b.dataset.ka;
+  if(a==='like'){k.liked=!k.liked;k.likes=Math.max(0,(k.likes||0)+(k.liked?1:-1));save();renderCm(p)}
+  if(a==='re')setReply(p,k);
+  if(a==='del')conf2(b,()=>{p.cm=p.cm.filter(z=>z.id!==k.id&&z.re!==k.id);save();renderCm(p);touch(p)})}
 async function sendCm(){
   const i=$('#cmIn'),t=i&&i.value.trim(),p=S.posts.find(x=>x.id===curPost);if(!t||!p||ub)return;
-  ub=true;$('#cmSend').disabled=true;i.value='';p.cm.push({who:'me',text:t,t:Date.now()});save();touch(p);renderCm(p);
-  await reactUser('comment',t,p);ub=false;const b=$('#cmSend');if(b)b.disabled=false;
+  ub=true;$('#cmSend').disabled=true;i.value='';
+  const k={id:cid(),who:'me',text:t,t:Date.now(),likes:0},tg=rt;if(tg)k.re=tg.id;rt=null;$('#rto').hidden=true;
+  p.cm.push(k);save();touch(p);renderCm(p);
+  await reactUser('comment',t,p,{k,to:tg&&tg.to});ub=false;const b=$('#cmSend');if(b)b.disabled=false;
 }
-
 /* ---------- Profils ---------- */
 let tabP='posts';
 function renderProfile(){
@@ -440,7 +495,7 @@ function renderProfile(){
   if(tabP==='chars'&&isMe){
     h+=all().map(k=>`<div class="mine">${avh(k,'')}<div class="mi"><b>${esc(k.n)}</b><div class="hd">@${esc(k.h)} · ${fmt(k.f)} abonnés</div></div><button class="btn ghost sm" data-prof="${esc(k.id)}">Voir</button>${k.id[0]==='c'&&!CH.some(z=>z.id===k.id)?`<button class="btn ghost sm" data-x="delch" data-v="${esc(k.id)}">Supprimer</button>`:''}</div>`).join('');
   }else{
-    h+=posts.length?`<div class="grid">${posts.map(p=>`<button class="tile ${p.tone>0?'good':p.tone<0?'bad':''}" data-open="${p.id}"><p>${esc(p.text)}</p><span class="tf">${p.likes} j’aime · ${p.cm.length} com.</span></button>`).join('')}</div>`:`<div class="empty">Aucune publication pour l’instant.</div>`;
+    h+=posts.length?posts.map(p=>postHTML(p)).join(''):`<div class="empty">Aucune publication pour l’instant.</div>`;
   }
   $('#vU').innerHTML=h;
 }
@@ -496,11 +551,15 @@ function applyTheme(){document.documentElement.dataset.t=TH.some(t=>t[0]===S.me.
 function renderPal(){$('#pal').innerHTML='<div class="hd pt">Apparence</div>'+TH.map(t=>`<button class="sw" data-x="th" data-v="${t[0]}" aria-pressed="${S.me.theme===t[0]}"><span class="dot" style="background:linear-gradient(135deg,${t[2]} 50%,${t[3]} 50%)"></span>${t[1]}</button>`).join('')}
 
 /* ---------- Messages privés ---------- */
-let cur='lea',cb=false;
-function strip(){$('#strip').innerHTML=all().map(c=>`<button role="tab" data-id="${esc(c.id)}" aria-selected="${c.id===cur}">${avh(c,'',1)}${esc(c.n.split(' ')[0])}</button>`).join('')}
+let cur='lea',cb=false,dmOpen=false,dmFrom=false;
+const lastDm=id=>(S.dms[id]||[]).filter(m=>m.text!=='…').slice(-1)[0];
+function inbox(){const L=all().map(c=>({c,m:lastDm(c.id)})).sort((a,b)=>((b.m&&b.m.t)||0)-((a.m&&a.m.t)||0));
+  $('#inbox').innerHTML=L.map(({c,m})=>`<button class="ct" data-dm="${esc(c.id)}">${avh(c,'',1)}<div class="mi"><div class="cn"><b>${esc(c.n)}</b>${c.v?BADGE:''}<span class="hd">@${esc(c.h)}</span></div><div class="hd cp">${m?(m.r==='me'?'Toi : ':'')+esc(m.text):'Nouvelle conversation'}</div></div>${m&&m.t?`<span class="hd">${ago(m.t)}</span>`:''}</button>`).join('')}
+function renderM(){const o=dmOpen&&byId(cur);$('#inbox').hidden=!!o;$('#chatw').hidden=!o;$('#back').hidden=!o;
+  $('#ttl').textContent=o?byId(cur).n:'Messages';if(o)msgs();else inbox()}
 function msgs(){
   if(!byId(cur))cur='lea';const h=S.dms[cur]||[],c=byId(cur),box=$('#msgs');
-  $('#chead').innerHTML=avh(c,'s')+`<div><b>${esc(c.n)}</b>${c.v?BADGE:''}<div class="hd">@${esc(c.h)} · ${fmt(c.f||0)} abonnés</div></div>`;
+  $('#chead').innerHTML=avh(c,'s')+`<div style="flex:1;min-width:0"><b>${esc(c.n)}</b>${c.v?BADGE:''}<div class="hd">@${esc(c.h)} · ${fmt(c.f||0)} abonnés</div></div><button class="btn ghost sm" data-x="cldm">Effacer</button>`;
   box.innerHTML=h.length?h.map(m=>`<div class="m ${m.r}">${esc(m.text)}</div>`).join(''):`<div class="empty">Écris à ${esc(c.n)} (@${esc(c.h)}). Aucune limite de messages.</div>`;
   box.scrollTop=box.scrollHeight;
 }
@@ -509,13 +568,13 @@ async function chat(){
   if(!CFG.k){toast('Ajoute une clé API (icône clé en haut).');openKey();return}
   cb=true;$('#mb').disabled=true;$('#mi').value='';
   const id=cur,c=byId(id),h=S.dms[id]=S.dms[id]||[];
-  h.push({r:'me',text:t});save();msgs();
+  h.push({r:'me',text:t,t:Date.now()});save();msgs();
   const ctx=h.slice(-40).map(m=>`${m.r==='me'?'Utilisateur':c.n}: ${m.text}`).join('\n');
-  const prompt=`Tu es ${c.n} (@${c.h}), ${c.b}. Tu discutes en messages privés avec un utilisateur (${S.me.name}${S.me.bio?', '+S.me.bio:''}) sur un réseau social. Sa réputation sur le réseau est de ${S.pop}/100 (${popInfo(S.pop).l}): si elle est basse tu es froid ou méfiant, si elle est haute tu es chaleureux. Reste dans ton personnage, réponds en français comme sur un vrai réseau social: spontané, familier, abréviations et emojis parfois, 1 à 3 phrases, jamais un ton d’assistant, sans guillemets ni préfixe avec ton nom.\n\nConversation:\n${ctx}\n\nÉcris uniquement ta prochaine réponse.`;
-  const m={r:'ai',text:'…'};h.push(m);msgs();
-  try{m.text=(await llm(prompt,false)).trim()||m.text}
+  const prompt=`Tu es ${c.n} (@${c.h}), ${persona(c)}. Tu discutes en messages privés avec un utilisateur (${S.me.name}${S.me.bio?', '+S.me.bio:''}) sur un réseau social. Sa réputation sur le réseau est de ${S.pop}/100 (${popInfo(S.pop).l}): si elle est basse tu es froid ou méfiant, si elle est haute tu es chaleureux. Reste dans ton personnage, réponds en français comme sur un vrai réseau social: spontané, familier, abréviations et emojis parfois, 1 à 3 phrases, jamais un ton d’assistant, sans guillemets ni préfixe avec ton nom.\n\nConversation:\n${ctx}\n\nÉcris uniquement ta prochaine réponse.`;
+  const m={r:'ai',text:'…',t:Date.now()};h.push(m);msgs();
+  try{m.text=(await llm(prompt,false)).trim()||m.text;m.t=Date.now()}
   catch(e){h.pop();toast(errMsg(e))}
-  save();if(view==='M'&&cur===id)msgs();cb=false;$('#mb').disabled=false;
+  save();if(view==='M')renderM();cb=false;$('#mb').disabled=false;
 }
 function arm(el,label,fn){
   if(!el.dataset.armed){const o=el.textContent;el.dataset.armed=1;el.textContent=label;later(3000,()=>{if(el.isConnected){delete el.dataset.armed;el.textContent=o}});return}
@@ -525,7 +584,7 @@ function arm(el,label,fn){
 /* ---------- Navigation ---------- */
 let view='F',curPost=null,curProf='me',stack=[];
 function refresh(){renderStories();$('#meAv').innerHTML=avh(meObj(),'',1);
-  if(view==='F')renderFeed();if(view==='U')renderProfile();if(view==='D')renderDetail();if(view==='M'){strip();msgs()}}
+  if(view==='F')renderFeed();if(view==='U')renderProfile();if(view==='D')renderDetail();if(view==='M')renderM()}
 function show(v,arg){
   view=v;if(v==='D')curPost=arg;if(v==='U')curProf=arg||'me';
   for(const k of['F','D','U','M'])$('#v'+k).hidden=k!==v;
@@ -535,14 +594,16 @@ function show(v,arg){
   if(v==='F'){$('#ttl').textContent='Tweety';renderFeed()}
   if(v==='D'){$('#ttl').textContent='Publication';renderDetail()}
   if(v==='U')renderProfile();
-  if(v==='M'){$('#ttl').textContent='Messages';strip();msgs()}
+  if(v==='M')renderM();
 }
 function go(v,arg){stack.push({view,curPost,curProf,y:scrollY});show(v,arg);scrollTo(0,0)}
-function back(){const s=stack.pop();if(!s){show('F');return}show(s.view,s.view==='D'?s.curPost:s.curProf);scrollTo(0,s.y||0)}
+function back(){if(view==='M'&&dmOpen&&!dmFrom){dmOpen=false;renderM();scrollTo(0,0);return}
+  const s=stack.pop();if(!s||s.view!=='M')dmOpen=false;if(!s){show('F');return}show(s.view,s.view==='D'?s.curPost:s.curProf);scrollTo(0,s.y||0)}
 const tabTo=(v,a)=>{stack=[];show(v,a);scrollTo(0,0)};
 
 function postAct(b){
   const art=b.closest('[data-id]'),p=S.posts.find(x=>x.id===art.dataset.id);if(!p)return;const a=b.dataset.pa;
+  if(a==='del'){conf2(b,()=>{S.posts=S.posts.filter(x=>x.id!==p.id);Q.cm=Q.cm.filter(x=>x.post!==p.id);save();if(view==='D')back();else refresh()});return}
   if(a==='like'){p.liked=!p.liked;p.likes+=p.liked?1:-1;save();touch(p)}
   if(a==='rt'){p.rted=!p.rted;p.rt=Math.max(0,(p.rt||0)+(p.rted?1:-1));save();touch(p)}
   if(a==='cm'){if(view==='D'){const i=$('#cmIn');if(i)i.focus()}else{focusCm=true;go('D',p.id)}}
@@ -562,13 +623,17 @@ function act(n,el){const v=el.dataset.v;
     case'mkch':makeChar();break;
     case'delch':arm(el,'Confirmer ?',()=>{S.chars=S.chars.filter(c=>c.id!==v);S.posts=S.posts.filter(p=>p.who!==v);S.posts.forEach(p=>p.cm=p.cm.filter(k=>k.who!==v));delete S.dms[v];delete S.over[v];delete S.ob[v];if(cur===v)cur='lea';save();refresh()});break;
     case'follow':S.fl[v]=!S.fl[v];save();renderProfile();break;
-    case'dm':cur=v;go('M');break;
+    case'dm':cur=v;dmOpen=true;dmFrom=true;go('M');break;
     case'chpho':chooseImg(192,192,u=>{S.over[v]=u;save();refresh()});break;
     case'chban':chooseImg(640,214,u=>{S.ob[v]=u;save();refresh()});break;
     case'chreset':{delete S.over[v];delete S.ob[v];const k=S.chars.find(c=>c.id===v);if(k){k.p='';k.pban=''}save();refresh();break}
     case'tab':tabP=v;renderProfile();break;
     case'savekey':syncK();CFG={p:KD.p,k:KD.k,m:KD.m===PROV[KD.p].m?'':KD.m};saveCfg();closeSheet();if(CFG.k)toast('Clé enregistrée');resetAi();break;
     case'rmkey':CFG.k='';saveCfg();closeSheet();resetAi();break;
+    case'cldm':arm(el,'Confirmer ?',()=>{S.dms[cur]=[];save();msgs()});break;
+    case'rpimg':pimg='';prevImg();break;
+    case'untag':tagF=null;renderFeed();break;
+    case'norep':rt=null;$('#rto').hidden=true;$('#cmIn').value='';break;
     case'th':S.me.theme=v;applyTheme();renderPal();save();break;
   }
 }
@@ -578,9 +643,12 @@ document.addEventListener('click',e=>{
   const t=e.target;
   if(t.id==='ov'){closeSheet();return}
   if(!t.closest('#pal')&&!t.closest('#palBtn'))$('#pal').hidden=true;
+  const ln=t.closest('.ln');if(ln){const h=ln.dataset.h;if(h[0]==='@'){const n=h.slice(1).toLowerCase(),c=all().find(z=>z.h.toLowerCase()===n);if(c)go('U',c.id);else if(S.me.handle.toLowerCase()===n)go('U','me');else toast('Compte introuvable')}else{tagF=h;tabTo('F')}return}
   const x=t.closest('[data-x]');if(x){act(x.dataset.x,x);return}
+  const dmb=t.closest('[data-dm]');if(dmb){cur=dmb.dataset.dm;dmOpen=true;dmFrom=false;renderM();scrollTo(0,0);return}
+  const ka=t.closest('[data-ka]');if(ka){kAct(ka);return}
   const pa=t.closest('[data-pa]');if(pa){postAct(pa);return}
-  if(t.id==='cmSend'){sendCm();return}
+  const cmSend=t.closest('#cmSend');if(cmSend){sendCm();return}
   const pf=t.closest('[data-prof]');if(pf){if(!$('#ov').hidden)return;go('U',pf.dataset.prof);return}
   const o=t.closest('[data-open]');if(o){go('D',o.dataset.open);return}
   const art=t.closest('.post[data-id]');if(art){go('D',art.dataset.id)}
@@ -594,10 +662,8 @@ $('#back').onclick=back;
 $('#popChip').onclick=()=>tabTo('U','me');
 $('#keyBtn').onclick=openKey;
 $('#palBtn').onclick=()=>{renderPal();$('#pal').hidden=!$('#pal').hidden};
-$('#tF').onclick=()=>tabTo('F');$('#tM').onclick=()=>tabTo('M');$('#tP').onclick=()=>tabTo('U','me');
-$('#pb').onclick=publish;$('#mb').onclick=chat;
-$('#strip').onclick=e=>{const b=e.target.closest('button');if(b){cur=b.dataset.id;strip();msgs()}};
-$('#cl').onclick=e=>arm(e.currentTarget,'Confirmer ?',()=>{S.dms[cur]=[];save();msgs();e.currentTarget.textContent='Effacer';delete e.currentTarget.dataset.armed});
+$('#tF').onclick=()=>tabTo('F');$('#tM').onclick=()=>{dmOpen=false;tabTo('M')};$('#tP').onclick=()=>tabTo('U','me');
+$('#pb').onclick=publish;$('#pimgb').innerHTML=I.im;$('#pimgb').onclick=()=>chooseImg(720,405,u=>{pimg=u;prevImg()});$('#mb').onclick=chat;
 
 /* ---------- Démarrage ---------- */
 $('#back').innerHTML=I.bk;$('#keyBtn').innerHTML=I.key;$('#palBtn').innerHTML=I.pal;
